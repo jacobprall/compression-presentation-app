@@ -1,24 +1,33 @@
-import logo from './logo.svg';
+import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
+import Subscription from './Subscription';
+import { WebSocketLink } from '@apollo/client/link/ws';
 import './App.css';
 
+const createApolloClient = () => {
+  return new ApolloClient({
+    link: new WebSocketLink({
+      uri: 'wss://fleet-bunny-18.hasura.app/v1/graphql',
+      options: {
+        reconnect: true,
+        connectionParams: {
+          headers: {
+            'x-hasura-admin-secret':
+              process.env.REACT_APP_X_HASURA_ADMIN_SECRET,
+          },
+        },
+      },
+    }),
+    cache: new InMemoryCache(),
+  });
+};
+
 function App() {
+  const client = createApolloClient();
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ApolloProvider client={client} className="App">
+      <Subscription />
+    </ApolloProvider>
   );
 }
 
