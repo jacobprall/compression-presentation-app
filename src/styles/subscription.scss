@@ -1,6 +1,22 @@
 @import './_normalize.scss';
 @import '~@timescale/web-styles/src/styles/utils';
 
+@keyframes spinner {
+  0% {
+    stroke-dashoffset: (0.66 * 108);
+    transform: rotate(0deg);
+  }
+  50% {
+    stroke-dashoffset: (3.14 * 108);
+    transform: rotate(540deg);
+    transform: rotate(720deg);
+  }
+  100% {
+    stroke-dashoffset: (0.66 * 108);
+    transform: rotate(1080deg);
+  }
+}
+
 .ts-compression {
   display: flex;
   justify-content: center;
@@ -32,10 +48,9 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    border: 1px solid #c5ddfc;
     box-sizing: border-box;
     background: white;
-
+    border: 1px solid #c5ddfc;
     box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.05);
     border-radius: 8px;
 
@@ -139,9 +154,52 @@
   }
 
   &__loading-screen {
-    width: 100vw;
-    position: absolute;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
+    position: fixed;
+    z-index: 5;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+
+    &__inner {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: sticky;
+      top: 0;
+    }
+
+    &__card {
+      padding: 64px 128px;
+      background: white;
+      border: 1px solid #c5ddfc;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.05);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: sticky;
+      top: 0;
+
+      & > h2 {
+        @include header(2);
+      }
+
+      & > svg {
+        width: 108px;
+        height: 108px;
+        & > circle {
+          fill: transparent;
+          stroke: #5b9cf2;
+          stroke-width: 4;
+          stroke-linecap: round;
+          stroke-dasharray: (3.14 * 108);
+          transform-origin: (0.5px * 108) (0.5px * 108) 0;
+          animation: spinner 4s linear infinite;
+        }
+      }
+    }
   }
 }

@@ -16,7 +16,7 @@ function CompressButton({ compressionComplete, setLoadModal }) {
     setLoadModal(true);
     compressChunks();
   }
-  return <button className={`btn btn__compress btn__compress--${compressionComplete && '--disabled'}`} onClick={() => handleClick()}>Compress</button>;
+  return <button className={`btn btn__compress btn__compress${compressionComplete && '--disabled'}`} onClick={() => handleClick()}>Compress</button>;
 }
 
 export default CompressButton;
