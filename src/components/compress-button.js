@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useMutation, gql } from '@apollo/client';
 import './buttons.scss';
 

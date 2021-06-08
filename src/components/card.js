@@ -1,9 +1,15 @@
 import React from 'react';
+import Count from './count';
 
-function Card({ chunk_name, before_compression_total_bytes, after_compression_total_bytes }) {
-  const getDenom = (x) => {
+function Card({
+  chunk_name,
+  before_compression_total_bytes,
+  after_compression_total_bytes,
+}) {
+  const getScale = (before, after) => {
+    const x = after / before;
     if (!x) {
-      return 0.2;
+      return 0.1;
     } else if (x > 1) {
       return 1;
     } else {
@@ -18,12 +24,18 @@ function Card({ chunk_name, before_compression_total_bytes, after_compression_to
     return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
   }
 
-  const getPercent = (after, before) => {
+  const getCompressionRatio = (before, after) => {
     if (!after) {
       return 0;
     }
-    return ((after / before) * 100).toFixed(2);
+    return (before / after).toFixed(2);
   };
+
+  const compressionRatio = getCompressionRatio(
+    before_compression_total_bytes,
+    after_compression_total_bytes
+  );
+
   return (
     <div className="ts-compression__grid-item">
       <h2>{chunk_name}</h2>
@@ -34,32 +46,30 @@ function Card({ chunk_name, before_compression_total_bytes, after_compression_to
               <div className="ts-compression__grid-item__before__circle" />
             </div>
             <h4>Before Compression</h4>
-            <p>
-              {formatNumber(before_compression_total_bytes) ?? 0} bytes
-            </p>
+            <p>{formatNumber(before_compression_total_bytes) ?? 0} bytes</p>
           </div>
           <div className="ts-compression__grid-item__after">
             <div className="ts-compression__grid-item__circle-container">
               <div
                 className="ts-compression__grid-item__after__circle"
                 style={{
-                  transform: `scale(${getDenom(
-                    after_compression_total_bytes /
-                      before_compression_total_bytes
+                  transform: `scale(${getScale(
+                    before_compression_total_bytes,
+                    after_compression_total_bytes
                   )})`,
                 }}
               />
             </div>
             <h4>After Compression</h4>
-            <p>{formatNumber(after_compression_total_bytes) ?? 0} bytes</p>
+            <Count suffix=" bytes" end={after_compression_total_bytes} />
           </div>
         </div>
         <p>
-          {getPercent(
-            after_compression_total_bytes,
-            before_compression_total_bytes
-          )}
-          % saved
+          <Count
+            prefix="Compression Ratio: "
+            end={compressionRatio}
+            decimals={2}
+          />
         </p>
       </div>
     </div>

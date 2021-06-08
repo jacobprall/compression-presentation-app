@@ -3,6 +3,7 @@ import { useMutation, useSubscription, gql } from '@apollo/client';
 import CompressButton from './components/compress-button';
 import AddDataButton from './components/add-data';
 import Card from './components/card';
+import { ChoiceGroup } from '@timescale/web-styles';
 import './styles/subscription.scss';
 
 const Subscription = () => {
@@ -23,37 +24,63 @@ const Subscription = () => {
 
   const [loadModal, setLoadModal] = useState(false);
   const [compressionComplete, setCompressionComplete] = useState(false);
+  const [sortBy, setSortBy] = useState('compressionRatio');
 
-  // const compressionComplete = () => {
-  //   if (data.chunks_with_compression.find(x => x.after_compression_total_bytes !== null)) {
-  //     setCompressionComplete(true);
-  //   }
-  // }
+  const sortData = (data = []) => {
+    if (sortBy === 'compressionRatio') {
+      console.log('hit sorting by compression ratio');
+      return data.sort((a, b) => {
+        return (
+          b.before_compression_total_bytes / b.after_compression_total_bytes -
+          a.before_compression_total_bytes / a.after_compression_total_bytes
+        );
+      });
+    } else {
+      return data.sort(
+        (a, b) =>
+          b.before_compression_total_bytes - a.before_compression_total_bytes
+      );
+    }
+  };
+
+  const handleSelect = (val) => {
+    setSortBy(val);
+  };
+
+  const choiceGroupData = {
+    type: 'radio',
+    label: 'Sort By:',
+    options: [
+      { label: 'Compression Ratio', value: 'compressionRatio' },
+      {
+        label: 'Before Compression Size',
+        value: 'before_compression_total_bytes',
+      },
+    ],
+  };
 
   useEffect(() => {
     // start up loading screen
     if (data === undefined) {
-      setLoadModal(true)
+      setLoadModal(true);
     } else {
-      setLoadModal(false)
-    };
+      setLoadModal(false);
+    }
+  }, [data]);
 
+  useEffect(() => {
     // check if compression is complete
-
     const compressComplete = data?.chunks_with_compression.every(
       (x) => x.after_compression_total_bytes !== null
     );
+
     if (compressComplete) {
       setCompressionComplete(true);
       setLoadModal(false);
+    } else {
+      setCompressionComplete(false);
     }
-
   }, [data]);
-
-  const handleCompressButton = () => {
-    setLoadModal(true);
-  };
-
 
 
   return (
@@ -74,9 +101,9 @@ const Subscription = () => {
       <div className="ts-compression__inner">
         <h2>Compression</h2>
         <p>Interactive visualization</p>
+
         <div className="ts-compression__grid">
-          {data &&
-            data.chunks_with_compression.map((item) => <Card {...item} />)}
+          {data && sortData(data.chunks_with_compression).map((item) => <Card {...item} />)}
         </div>
         <div className="ts-compression__buttons">
           <CompressButton
@@ -84,6 +111,12 @@ const Subscription = () => {
             setLoadModal={setLoadModal}
           />
           <AddDataButton />
+          <ChoiceGroup
+            label="Sort By: "
+            {...choiceGroupData}
+            onChange={(val) => handleSelect(val)}
+            value={sortBy}
+          />
         </div>
       </div>
     </div>
