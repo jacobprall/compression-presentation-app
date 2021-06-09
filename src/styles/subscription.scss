@@ -116,7 +116,7 @@
     }
 
     &__circle--decompressed {
-      display: flex;
+      position: relative;
       justify-content: center;
       background-size: cover;
       background-repeat: no-repeat;
@@ -142,10 +142,16 @@
 
     &__circle-container {
       flex-grow: 1;
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 16px;
+
+      & > .fixed-circle {
+        position: absolute;
+        top: 0;
+      }
     }
 
     &__inner {

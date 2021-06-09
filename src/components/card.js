@@ -61,6 +61,17 @@ function Card({
       <div className="ts-compression__grid-item__inner">
         <h4>{chunk_name}</h4>
         <div className="ts-compression__grid-item__circle-container">
+          <div className="fixed-circle">
+            <svg
+              width="160"
+              height="160"
+              viewBox="0 0 160 160"
+              xmlns="http://www.w3.org/2000/svg"
+              >
+
+              <circle cx="80" cy="80" r="78" strokeWidth="2" stroke='gray' fill='white' />
+            </svg>
+          </div>
           <div className={circleClassNames}>
             <svg
               width="160"
