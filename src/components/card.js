@@ -59,6 +59,7 @@ function Card({
         </div>
       </div>
       <div className="ts-compression__grid-item__inner">
+        <h4>{chunk_name}</h4>
         <div className="ts-compression__grid-item__circle-container">
           <div className={circleClassNames}>
             <svg
@@ -75,7 +76,7 @@ function Card({
               }}
             >
               <circle cx="80" cy="80" r="64" />
-              <circle cx="80" cy="80" r="78" stroke-width="2" />
+              <circle cx="80" cy="80" r="78" strokeWidth="2" />
             </svg>
           </div>
         </div>
@@ -103,7 +104,6 @@ function Card({
           decimals={2}
         />
         <Button isCompressed={isCompressed} setLoadModal={setLoadModal} chunkName={chunk_name}>
-          {isCompressed ? 'Decompress' : 'Compress'}
         </Button>
       </div>
     </div>

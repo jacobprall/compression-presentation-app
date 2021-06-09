@@ -108,6 +108,7 @@ const Subscription = () => {
           {data && data.chunks_with_compression.map((chunk) => <Card {...chunk} />)}
         </div>
         <div className="ts-compression__buttons">
+          {/* TO DO - COMPRESS ALL, DECOMPRESS ALL, SORT */}
           {/* <Button
             isCompressed={compressAllComplete}
             setLoadModal={setLoadModal}

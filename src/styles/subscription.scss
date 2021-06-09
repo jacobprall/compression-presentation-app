@@ -79,7 +79,7 @@
   }
 
   &__grid-item {
-    padding: 32px 32px 16px 32px;
+    padding: 32px 32px 32px 32px;
     position: relative;
     border: 1px solid gray;
     display: flex;
@@ -91,11 +91,6 @@
     box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.05);
     border-radius: 8px;
     z-index: 1;
-
-    & > h2 {
-      @include header(3);
-      margin-bottom: 40px;
-    }
 
     &__circle--compressed {
       display: flex;
@@ -150,7 +145,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 60px;
+      margin-bottom: 16px;
     }
 
     &__inner {
@@ -161,6 +156,17 @@
       & > button {
         position: relative;
         z-index: 12;
+      }
+
+      & > h4 {
+        @include header(3);
+        margin-bottom: 16px;
+      }
+
+      & > p {
+        @include body-copy(3);
+        margin: 16px 0px;
+        font-weight: 700;
       }
     }
 
@@ -173,6 +179,15 @@
         h4,
         p {
           text-align: center;
+        }
+
+        h4 {
+          @include body-copy(3);
+          font-weight: 700;
+        }
+
+        p {
+          @include body-copy(3);
         }
       }
     }
