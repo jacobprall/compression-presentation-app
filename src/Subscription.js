@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useMutation, useSubscription, gql } from '@apollo/client';
-import CompressButton from './components/compress-button';
-import AddDataButton from './components/add-data';
+import Button from './components/button';
 import Card from './components/card';
 import { ChoiceGroup } from '@timescale/web-styles';
 import './styles/subscription.scss';
@@ -23,41 +22,43 @@ const Subscription = () => {
   );
 
   const [loadModal, setLoadModal] = useState(false);
-  const [compressionComplete, setCompressionComplete] = useState(false);
-  const [sortBy, setSortBy] = useState('compressionRatio');
+  const [compressAllComplete, setCompressAllComplete] = useState(false);
+  const [allChunks, setAllChunks] = useState([]);
 
-  const sortData = (data = []) => {
-    if (sortBy === 'compressionRatio') {
-      console.log('hit sorting by compression ratio');
-      return data.sort((a, b) => {
-        return (
-          b.before_compression_total_bytes / b.after_compression_total_bytes -
-          a.before_compression_total_bytes / a.after_compression_total_bytes
-        );
-      });
-    } else {
-      return data.sort(
-        (a, b) =>
-          b.before_compression_total_bytes - a.before_compression_total_bytes
-      );
-    }
-  };
+  // TO DO - SORTING
+  // const [sortBy, setSortBy] = useState('compressionRatio');
 
-  const handleSelect = (val) => {
-    setSortBy(val);
-  };
+  // const sortData = (data = []) => {
+  //   if (sortBy === 'compressionRatio') {
+  //     return data.sort((a, b) => {
+  //       return (
+  //         b.before_compression_total_bytes / b.after_compression_total_bytes -
+  //         a.before_compression_total_bytes / a.after_compression_total_bytes
+  //       );
+  //     });
+  //   } else {
+  //     return data.sort(
+  //       (a, b) =>
+  //         b.before_compression_total_bytes - a.before_compression_total_bytes
+  //     );
+  //   }
+  // };
 
-  const choiceGroupData = {
-    type: 'radio',
-    label: 'Sort By:',
-    options: [
-      { label: 'Compression Ratio', value: 'compressionRatio' },
-      {
-        label: 'Before Compression Size',
-        value: 'before_compression_total_bytes',
-      },
-    ],
-  };
+  // const handleSelect = (val) => {
+  //   setSortBy(val);
+  // };
+
+  // const choiceGroupData = {
+  //   type: 'radio',
+  //   label: 'Sort By:',
+  //   options: [
+  //     { label: 'Compression Ratio', value: 'compressionRatio' },
+  //     {
+  //       label: 'Before Compression Size',
+  //       value: 'before_compression_total_bytes',
+  //     },
+  //   ],
+  // };
 
   useEffect(() => {
     // start up loading screen
@@ -65,20 +66,21 @@ const Subscription = () => {
       setLoadModal(true);
     } else {
       setLoadModal(false);
+      setAllChunks(data.chunks_with_compression.map((chunk) => chunk.chunk_name))
     }
   }, [data]);
 
   useEffect(() => {
     // check if compression is complete
-    const compressComplete = data?.chunks_with_compression.every(
+    const compressionComplete = data?.chunks_with_compression.every(
       (x) => x.after_compression_total_bytes !== null
     );
 
-    if (compressComplete) {
-      setCompressionComplete(true);
+    if (compressionComplete) {
+      setCompressAllComplete(true);
       setLoadModal(false);
     } else {
-      setCompressionComplete(false);
+      setCompressAllComplete(false);
     }
   }, [data]);
 
@@ -103,20 +105,27 @@ const Subscription = () => {
         <p>Interactive visualization</p>
 
         <div className="ts-compression__grid">
-          {data && sortData(data.chunks_with_compression).map((item) => <Card {...item} />)}
+          {data && data.chunks_with_compression.map((chunk) => <Card {...chunk} />)}
         </div>
         <div className="ts-compression__buttons">
-          <CompressButton
-            compressionComplete={compressionComplete}
+          {/* <Button
+            isCompressed={compressAllComplete}
             setLoadModal={setLoadModal}
-          />
-          <AddDataButton />
-          <ChoiceGroup
+            chunks={allChunks}
+            
+          /> */}
+          {/* <Button 
+            jobComplete={false}
+            setLoadModal={setLoadModal}
+            buttonType='addData'
+            label='ADD DATA'
+          /> */}
+          {/* <ChoiceGroup
             label="Sort By: "
             {...choiceGroupData}
             onChange={(val) => handleSelect(val)}
             value={sortBy}
-          />
+          /> */}
         </div>
       </div>
     </div>

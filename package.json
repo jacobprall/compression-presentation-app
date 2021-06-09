@@ -8,6 +8,7 @@
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
     "@timescale/web-styles": "git+ssh://git@github.com/timescale/web-styles.git",
+    "classnames": "^2.3.1",
     "graphql": "^15.5.0",
     "node-sass": "5.0",
     "normalize.css": "^8.0.1",
