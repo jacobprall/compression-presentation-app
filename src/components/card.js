@@ -14,11 +14,11 @@ function Card({
   const [loadModal, setLoadModal] = useState(true);
 
   const getScale = (before, after) => {
-    const x = after / before;
-    if (!isCompressed || !x) {
+    const scale = after / before;
+    if (!isCompressed || !scale) {
       return 1;
     }
-    return x;
+    return scale;
   };
 
   const getCompressionRatio = (before, after) => {
@@ -41,8 +41,8 @@ function Card({
 
   useEffect(() => {
     setLoadModal(false);
-    setIsCompressed(after_compression_total_bytes !== null)
-  }, [after_compression_total_bytes, before_compression_total_bytes]);
+    setIsCompressed(!!after_compression_total_bytes)
+  }, [after_compression_total_bytes]);
 
   return (
     <div className="ts-compression__grid-item">
@@ -67,7 +67,6 @@ function Card({
               height="160"
               viewBox="0 0 160 160"
               fill="none"
-              xmlns="http://www.w3.org/2000/svg"
               style={{
                 transform: `scale(${getScale(
                   before_compression_total_bytes,
@@ -103,7 +102,7 @@ function Card({
           end={compressionRatio}
           decimals={2}
         />
-        <Button isCompressed={isCompressed} setLoadModal={setLoadModal} chunkName={chunk_name}>
+        <Button isCompressed={isCompressed} setLoadModal={setLoadModal} chunkName={chunk_name} loadModal={loadModal}>
         </Button>
       </div>
     </div>

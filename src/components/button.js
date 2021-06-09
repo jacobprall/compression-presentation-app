@@ -27,9 +27,9 @@ const ADD_DATA = '';
     addData: ADD_DATA,
   };
 
-function Button({ jobComplete, setLoadModal, isCompressed, chunkName }) {
+function Button({ jobComplete, setLoadModal, isCompressed, chunkName, loadModal }) {
   const buttonType = isCompressed ? 'decompress' : isCompressed  === undefined ? 'addData' : 'compress';
-  const btnClassNames = classNames({'btn': true, [`btn__${buttonType}`]: true, [`btn__${buttonType}--disabled`]: jobComplete});
+  const btnClassNames = classNames('btn', `btn__${buttonType}`, {[`btn__${buttonType}--disabled`]: loadModal});
   const [mutation] = useMutation(mutationsMap[buttonType]);
   const mutationVariables = chunkName ? { variables: {chunk: chunkName} } : {variables: {}};
   const label = isCompressed !== undefined ? buttonType.toUpperCase() : 'ADD DATA';

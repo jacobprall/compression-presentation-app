@@ -51,5 +51,10 @@
       background: color($blue, 500);
       cursor: pointer;
     }
+
+    &--disabled {
+      pointer-events: none;
+      background-color: color($navy, 200);
+    }
   }
 }
