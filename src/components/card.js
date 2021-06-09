@@ -1,5 +1,6 @@
 import React from 'react';
 import Count from './count';
+import { useMutation, gql } from '@apollo/client';
 
 function Card({
   chunk_name,
@@ -36,42 +37,47 @@ function Card({
     after_compression_total_bytes
   );
 
+  const DECOMPRESS_CHUNK_NAME = gql`
+    mutation MyMutation($chunk_name: String!) {
+      decompress_chunk_named(args: {arg_1:  $chunk_name}) {
+        decompress_chunk
+      }
+    }
+  `;
+  const COMPRESS_CHUNK_NAME = gql`
+    mutation MyMutation($chunk_name: String!) {
+      decompress_chunk_named(args: {arg_1: $chunk_name}) {
+        compress_chunk
+      }
+    }
+  `;
+
+  const [compressChunk, decompressChunk] = useMutation(COMPRESS_CHUNK_NAME, DECOMPRESS_CHUNK_NAME);
+
+  const compress = (name) => {
+    console.log('compressing', name);
+    compressChunk({variables: {chunk_name: name}})
+  }
+  const decompress = (name) => {
+    console.log('compressing', name);
+    decompressChunk({variables: {chunk_name: name}})
+  }
+
   return (
-    <div className="ts-compression__grid-item">
-      <h2>{chunk_name}</h2>
-      <div className="ts-compression__grid-item__info">
-        <div className="ts-compression__grid-item__info__inner">
-          <div className="ts-compression__grid-item__before">
-            <div className="ts-compression__grid-item__circle-container">
-              <div className="ts-compression__grid-item__before__circle" />
-            </div>
-            <h4>Before Compression</h4>
-            <p>{formatNumber(before_compression_total_bytes) ?? 0} bytes</p>
-          </div>
-          <div className="ts-compression__grid-item__after">
-            <div className="ts-compression__grid-item__circle-container">
-              <div
-                className="ts-compression__grid-item__after__circle"
-                style={{
-                  transform: `scale(${getScale(
-                    before_compression_total_bytes,
-                    after_compression_total_bytes
-                  )})`,
-                }}
-              />
-            </div>
-            <h4>After Compression</h4>
-            <Count suffix=" bytes" end={after_compression_total_bytes} />
-          </div>
-        </div>
-        <p>
-          <Count
-            prefix="Compression Ratio: "
-            end={compressionRatio}
-            decimals={2}
-          />
-        </p>
-      </div>
+    <div className="ts-compression__grid-item__circle-container">
+      <div className="ts-compression__grid-item__before__circle"
+        onClick={() => {compress(chunk_name)}}
+      />
+      <div
+        className="ts-compression__grid-item__after__circle"
+        onClick={() => decompress(chunk_name)}
+        style={{
+          transform: `scale(${getScale(
+            before_compression_total_bytes,
+            after_compression_total_bytes
+          )})`,
+        }}
+      />
     </div>
   );
 }
