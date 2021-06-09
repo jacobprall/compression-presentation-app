@@ -59,18 +59,17 @@ function Card({
     compressChunk({variables: {chunk_name: name}})
   }
   const decompress = (name) => {
-    console.log('compressing', name);
+    console.log('decompressing', name);
     decompressChunk({variables: {chunk_name: name}})
   }
 
   return (
     <div className="ts-compression__grid-item__circle-container">
       <div className="ts-compression__grid-item__before__circle"
-        onClick={() => {compress(chunk_name)}}
       />
       <div
         className="ts-compression__grid-item__after__circle"
-        onClick={() => decompress(chunk_name)}
+        onClick={() => { (before_compression_total_bytes > 0 ? compress : decompress)(chunk_name) }}
         style={{
           transform: `scale(${getScale(
             before_compression_total_bytes,
