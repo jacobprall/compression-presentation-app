@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Count from './count';
 import classNames from 'classnames';
-import Button from './button';
+import MutationTrigger from './mutation-trigger';
 
 function Card({
   chunk_name,
@@ -13,7 +13,7 @@ function Card({
   );
   const [loadModal, setLoadModal] = useState(true);
 
-  const getScale = (before, after) => {
+  const getScale = ({ before, after, isCompressed }) => {
     const x = after / before;
     if (!isCompressed || !x) {
       return 1;
@@ -25,7 +25,7 @@ function Card({
     if (!after) {
       return 0;
     }
-    return (before / after).toFixed(2);
+    return parseFloat((before / after).toFixed(2));
   };
 
   const compressionRatio = getCompressionRatio(
@@ -41,8 +41,8 @@ function Card({
 
   useEffect(() => {
     setLoadModal(false);
-    setIsCompressed(after_compression_total_bytes !== null)
-  }, [after_compression_total_bytes, before_compression_total_bytes]);
+    setIsCompressed(after_compression_total_bytes !== null);
+  }, [after_compression_total_bytes]);
 
   return (
     <div className="ts-compression__grid-item">
@@ -67,9 +67,15 @@ function Card({
               height="160"
               viewBox="0 0 160 160"
               xmlns="http://www.w3.org/2000/svg"
-              >
-
-              <circle cx="80" cy="80" r="78" strokeWidth="2" stroke='gray' fill='white' />
+            >
+              <circle
+                cx="80"
+                cy="80"
+                r="78"
+                strokeWidth="2"
+                stroke="gray"
+                fill="white"
+              />
             </svg>
           </div>
           <div className={circleClassNames}>
@@ -80,10 +86,11 @@ function Card({
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
               style={{
-                transform: `scale(${getScale(
-                  before_compression_total_bytes,
-                  after_compression_total_bytes
-                )})`,
+                transform: `scale(${getScale({
+                  before: before_compression_total_bytes,
+                  after: after_compression_total_bytes,
+                  isCompressed,
+                })})`,
               }}
             >
               <circle cx="80" cy="80" r="64" />
@@ -114,8 +121,12 @@ function Card({
           end={compressionRatio}
           decimals={2}
         />
-        <Button isCompressed={isCompressed} setLoadModal={setLoadModal} chunkName={chunk_name}>
-        </Button>
+        <MutationTrigger
+          isCompressed={isCompressed}
+          setLoadModal={setLoadModal}
+          chunkName={chunk_name}
+          mutationType={isCompressed ? 'decompress' : 'compress'}
+        />
       </div>
     </div>
   );

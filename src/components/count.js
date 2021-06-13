@@ -13,7 +13,7 @@ function Count({
     <p>
       <CountUp
         start={start}
-        end={end !== 0 && end > 50000 ? end - 5000 : end}
+        end={end}
         duration={duration}
         separator=","
         decimals={decimals}
