@@ -1,8 +1,8 @@
-import React from 'react';
-import { useMutation, gql } from '@apollo/client';
+import { useMutation, gql, DocumentNode } from '@apollo/client';
 import './buttons.scss';
 import classNames from 'classnames';
 
+// Mutations
 const COMPRESS_CHUNK = gql`
   mutation ($chunk: String!) {
     compress_chunk_named(args: { arg_1: $chunk }) {
@@ -19,27 +19,35 @@ const DECOMPRESS_CHUNK = gql`
   }
 `;
 
-const mutationsMap = {
+// Types
+interface MutationTriggerTypes {
+  setLoadModal: (params: boolean) => void;
+  chunkName: string;
+  mutationType: string;
+}
+
+interface IMutationMap {
+  [index: string]: DocumentNode;
+}
+
+const mutationsMap: IMutationMap = {
   compress: COMPRESS_CHUNK,
   decompress: DECOMPRESS_CHUNK,
 };
 
 function MutationTrigger({
-  jobComplete,
   setLoadModal,
   chunkName,
   mutationType,
-}) {
-  const btnClassNames = classNames('btn', `btn__${mutationType}`, {
-    [`btn__${mutationType}--disabled`]: jobComplete,
-  });
+}: MutationTriggerTypes) {
+  const btnClassNames = classNames('btn', `btn__${mutationType}`);
   const [mutation] = useMutation(mutationsMap[mutationType]);
   const mutationVariables = chunkName
     ? { variables: { chunk: chunkName } }
     : { variables: {} };
   const label = mutationType.toUpperCase();
 
-  const handleClick = () => {
+  const handleClick = async () => {
     setLoadModal(true);
     mutation(mutationVariables);
   };

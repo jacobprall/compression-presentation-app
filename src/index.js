@@ -1,10 +1,10 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
+import Subscription from './Subscription';
 
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <Subscription />
   </React.StrictMode>,
   document.getElementById('root')
 );

@@ -1,7 +1,6 @@
 import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
-import Subscription from './Subscription';
+import App from './App';
 import { WebSocketLink } from '@apollo/client/link/ws';
-import './App.css';
 
 const createApolloClient = () => {
   return new ApolloClient({
@@ -21,14 +20,14 @@ const createApolloClient = () => {
   });
 };
 
-function App() {
+function Subscription() {
   const client = createApolloClient();
 
   return (
-    <ApolloProvider client={client} className="App">
-      <Subscription />
+    <ApolloProvider client={client}>
+      <App />
     </ApolloProvider>
   );
 }
 
-export default App;
+export default Subscription;
