@@ -12,6 +12,7 @@ interface CompressionCircleProps {
 interface compressAnimationProps {
   isCompressed: boolean;
   inner: boolean;
+  firstLoad: boolean;
 }
 
 const spinner = keyframes`
@@ -33,7 +34,10 @@ const spinner = keyframes`
 const compressAnimation = ({
   isCompressed,
   inner,
-}: compressAnimationProps) => keyframes`
+  firstLoad,
+}: compressAnimationProps) =>
+  !firstLoad &&
+  keyframes`
   0% {
     ${inner ? 'fill' : 'stroke'}: ${isCompressed ? '#141e35' : '#fdb515'};
   }
@@ -145,19 +149,54 @@ export const CompressionCircle = styled.div`
     transition: transform 3s ease-out;
 
     & > circle:first-child {
-      animation: ${(props: CompressionCircleProps) => !props.firstLoad &&
-          compressAnimation({ isCompressed: props.isCompressed, inner: true })}
+      animation: ${(props: CompressionCircleProps) =>
+          compressAnimation({
+            isCompressed: props.isCompressed,
+            inner: true,
+            firstLoad: props.firstLoad,
+          })}
         3s ease-out;
       fill: ${(props: CompressionCircleProps) =>
         props.isCompressed ? '#fdb515' : '#141e35'};
     }
 
     & > circle:last-child {
-      animation: ${(props: CompressionCircleProps) => !props.firstLoad &&
-          compressAnimation({ isCompressed: props.isCompressed, inner: false })}
+      animation: ${(props: CompressionCircleProps) =>
+          compressAnimation({
+            isCompressed: props.isCompressed,
+            inner: false,
+            firstLoad: props.firstLoad,
+          })}
         3s ease-out;
       stroke: ${(props: CompressionCircleProps) =>
         props.isCompressed ? '#fdb515' : '#141e35'};
     }
+  }
+`;
+
+export const CardInfoWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  gap: 50px;
+`;
+
+export const CardInfo = styled.div`
+  & > h4,
+  & > span {
+    text-align: center;
+  }
+
+  & > h4 {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    font-weight: 700;
+  }
+
+  & > span {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    display: block;
   }
 `;

@@ -69,7 +69,7 @@
   //   justify-content: center;
   // }
 
-  &__grid-item {
+  // &__grid-item {
     // padding: 32px 32px 32px 32px;
     // position: relative;
     // border: 1px solid gray;
@@ -167,29 +167,29 @@
     //   }
     // }
 
-    &__info {
-      display: flex;
-      justify-content: space-between;
-      gap: 50px;
+  //   &__info {
+  //     display: flex;
+  //     justify-content: space-between;
+  //     gap: 50px;
 
-      & > div {
-        h4,
-        span {
-          text-align: center;
-        }
+  //     & > div {
+  //       h4,
+  //       span {
+  //         text-align: center;
+  //       }
 
-        h4 {
-          @include body-copy(3);
-          font-weight: 700;
-        }
+  //       h4 {
+  //         @include body-copy(3);
+  //         font-weight: 700;
+  //       }
 
-        span {
-          @include body-copy(3);
-          display: block;
-        }
-      }
-    }
-  }
+  //       span {
+  //         @include body-copy(3);
+  //         display: block;
+  //       }
+  //     }
+  //   }
+  // }
 
   // &__inner {
   //   display: flex;

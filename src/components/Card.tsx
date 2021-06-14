@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import Count from './Count';
-import classNames from 'classnames';
 import MutationTrigger from './MutationTrigger';
 import CardProps from '../interfaces';
 import {
@@ -11,7 +10,9 @@ import {
   CardWrapperInner,
   FixedCircle,
   CompressionCircle,
-  CircleContainer
+  CircleContainer,
+  CardInfoWrapper,
+  CardInfo,
 } from './Card.styles';
 
 interface ComputeProps {
@@ -50,21 +51,10 @@ function Card({
     after: after_compression_total_bytes,
   });
 
-  const circleClassNames = classNames({
-    'ts-compression__grid-item__circle': true,
-    [`ts-compression__grid-item__circle--compressed`]: isCompressed,
-    [`ts-compression__grid-item__circle--decompressed`]: !isCompressed,
-  });
-
   useEffect(() => {
     setLoadModal(false);
     setIsCompressed(after_compression_total_bytes !== null);
-    // setFirstLoad(false);
   }, [after_compression_total_bytes]);
-
-  // useEffect(() => {
-  //   setFirstLoad(false);
-  // }, [])
 
   return (
     <CardWrapper>
@@ -111,17 +101,13 @@ function Card({
                 })})`,
               }}
             >
-              <circle
-                cx="80"
-                cy="80"
-                r="64"
-              />
+              <circle cx="80" cy="80" r="64" />
               <circle cx="80" cy="80" r="78" strokeWidth="2" />
             </svg>
           </CompressionCircle>
         </CircleContainer>
-        <div className="ts-compression__grid-item__info">
-          <div>
+        <CardInfoWrapper>
+          <CardInfo>
             <h4>Before Compression</h4>
             <Count
               prefix=""
@@ -129,8 +115,8 @@ function Card({
               start={before_compression_total_bytes}
               end={before_compression_total_bytes}
             />
-          </div>
-          <div>
+          </CardInfo>
+          <CardInfo>
             <h4>After Compression</h4>
             <Count
               prefix=""
@@ -138,8 +124,8 @@ function Card({
               start={before_compression_total_bytes}
               end={after_compression_total_bytes}
             />
-          </div>
-        </div>
+          </CardInfo>
+        </CardInfoWrapper>
         <Count
           prefix="Compression Ratio: "
           suffix=""
@@ -150,6 +136,7 @@ function Card({
           setLoadModal={setLoadModal}
           chunkName={chunk_name}
           mutationType={isCompressed ? 'decompress' : 'compress'}
+          setFirstLoad={setFirstLoad}
         />
       </CardWrapperInner>
     </CardWrapper>

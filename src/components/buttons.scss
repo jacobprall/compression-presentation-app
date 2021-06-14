@@ -8,19 +8,6 @@
   font-weight: 700;
   text-transform: uppercase;
 
-  &__add-data {
-    background: #ffffff;
-    border: 2px solid #fdb515;
-    box-sizing: border-box;
-    border-radius: 4px;
-    transition: background-color 0.3s;
-
-    &:hover {
-      background: color($gold, 500);
-      cursor: pointer;
-    }
-  }
-
   &__compress {
     background-color: color($gold);
     border: 2px solid #fdb515;
