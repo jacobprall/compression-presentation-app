@@ -59,6 +59,8 @@ const Subscription = () => {
   //     },
   //   ],
   // };
+  const svg = typeof window !== 'undefined' && document.getElementById('chunks');
+  const chunksRect = svg?.getBoundingClientRect();
 
   useEffect(() => {
     // start up loading screen
@@ -85,6 +87,7 @@ const Subscription = () => {
   }, [data]);
 
 
+
   return (
     <div className="ts-compression">
       <div
@@ -104,8 +107,17 @@ const Subscription = () => {
         <h2>Compression</h2>
         <p>Interactive visualization</p>
 
-        <div className="ts-compression__grid">
-          {data && data.chunks_with_compression.map((chunk) => <Card {...chunk} />)}
+        <div classname="ts-compression__inner__chunks">
+
+           <svg width="100vw"
+             id="chunks"
+              height="100vh"
+              viewBox="0 0 100vw 100vh"
+              fill="none"
+              classname="ts-compression__inner__chunks__cards-wrapper"
+              xmlns="http://www.w3.org/2000/svg" >
+          {data && data.chunks_with_compression.map((chunk) => <Card {...chunk} screenDimensions={chunksRect} />)}
+        </svg>
         </div>
         <div className="ts-compression__buttons">
           {/* TO DO - COMPRESS ALL, DECOMPRESS ALL, SORT */}

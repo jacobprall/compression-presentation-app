@@ -68,14 +68,25 @@
     margin-bottom: 64px;
   }
 
-  &__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, 400px);
+  &__chunks {
+    color: red;
+    border: solid red 1px;
+    display: flex;
+    align-items: center;
     max-width: 1400px;
     width: 100%;
     grid-gap: 32px;
     margin-bottom: 64px;
     justify-content: center;
+
+    &__cards {
+      position: absolute;
+      top: 0;
+      right: 0;
+      &__wrapper {
+        position: relative;
+      }
+    }
   }
 
   &__grid-item {
@@ -153,50 +164,6 @@
         top: 0;
       }
     }
-
-    &__inner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-
-      & > button {
-        position: relative;
-        z-index: 12;
-      }
-
-      & > h4 {
-        @include header(3);
-        margin-bottom: 16px;
-      }
-
-      & > p {
-        @include body-copy(3);
-        margin: 16px 0px;
-        font-weight: 700;
-      }
-    }
-
-    &__info {
-      display: flex;
-      justify-content: space-between;
-      gap: 50px;
-
-      & > div {
-        h4,
-        p {
-          text-align: center;
-        }
-
-        h4 {
-          @include body-copy(3);
-          font-weight: 700;
-        }
-
-        p {
-          @include body-copy(3);
-        }
-      }
-    }
   }
 
   &__inner {
@@ -217,6 +184,24 @@
       font-weight: 300;
       padding-bottom: 32px;
     }
+
+    &__chunks {
+      background: red;
+
+      &__cards-wrapper {
+        background: yellow;
+        &__card {
+
+          background: pink;
+          &--info {
+            background: purple;
+            
+          }
+        }
+      }
+    }
+
+
   }
 
   &__loading-screen {

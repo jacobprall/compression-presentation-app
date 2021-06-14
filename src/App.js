@@ -21,6 +21,7 @@ const createApolloClient = () => {
   });
 };
 
+
 function App() {
   const client = createApolloClient();
 
