@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useMutation, useSubscription, gql } from '@apollo/client';
 import Button from './components/button';
 import Card from './components/card';
+import CardInfo from './components/cardInfo';
 import { ChoiceGroup } from '@timescale/web-styles';
 import './styles/subscription.scss';
 
@@ -24,6 +25,9 @@ const Subscription = () => {
   const [loadModal, setLoadModal] = useState(false);
   const [compressAllComplete, setCompressAllComplete] = useState(false);
   const [allChunks, setAllChunks] = useState([]);
+  const [cardInfo, setCardInfo] = useState({});
+
+  const handleCardInfo = (info) => setCardInfo(info);
 
   // TO DO - SORTING
   // const [sortBy, setSortBy] = useState('compressionRatio');
@@ -87,7 +91,6 @@ const Subscription = () => {
   }, [data]);
 
 
-
   return (
     <div className="ts-compression">
       <div
@@ -106,17 +109,19 @@ const Subscription = () => {
       <div className="ts-compression__inner">
         <h2>Compression</h2>
         <p>Interactive visualization</p>
-
-        <div classname="ts-compression__inner__chunks">
+        <div className="ts-compression__inner__info--wrapper">
+          <CardInfo {...cardInfo} />
+        </div>
+        <div className="ts-compression__inner__chunks">
 
            <svg width="100vw"
              id="chunks"
               height="100vh"
               viewBox="0 0 100vw 100vh"
               fill="none"
-              classname="ts-compression__inner__chunks__cards-wrapper"
+              className="ts-compression__inner__chunks__cards-wrapper"
               xmlns="http://www.w3.org/2000/svg" >
-          {data && data.chunks_with_compression.map((chunk) => <Card {...chunk} screenDimensions={chunksRect} />)}
+          {data && data.chunks_with_compression.map((chunk) => <Card {...chunk} screenDimensions={chunksRect} handleCardInfo={handleCardInfo} />)}
         </svg>
         </div>
         <div className="ts-compression__buttons">
