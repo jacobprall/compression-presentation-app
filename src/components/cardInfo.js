@@ -8,12 +8,9 @@ const CardInfo = ({
   before_compression_total_bytes,
   after_compression_total_bytes,
   range_start,
-  screenDimensions,
+  screenPosition,
   range_end,
-  posX,
-  posY,
 }) => {
-
   const [isCompressed, setIsCompressed] = useState(
     after_compression_total_bytes !== null
   );
@@ -31,8 +28,17 @@ const CardInfo = ({
     after_compression_total_bytes
   );
 
+  if (screenPosition) console.log('screenPosition: ', screenPosition);
+
   return (
-    <div className="ts-compression__inner__info">
+    <div
+      className="ts-compression__inner__info"
+      style={{
+        top: `${screenPosition?.top || 20}px`,
+        left: `calc(${screenPosition?.left || 20}px - 200px)`,
+        border: `${screenPosition ? '1px' : '0'} solid red`,
+      }}
+    >
       <div className="ts-compression__inner__chunks__cards-wrapper__card__info--wrapper">
         <h4>{chunk_name}</h4>
         <div className="ts-compression__inner__chunks__cards-wrapper__card__info">

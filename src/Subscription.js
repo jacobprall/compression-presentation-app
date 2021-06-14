@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import classNames from 'classnames';
 import { useMutation, useSubscription, gql } from '@apollo/client';
 import Button from './components/button';
 import Card from './components/card';
@@ -90,6 +91,9 @@ const Subscription = () => {
     }
   }, [data]);
 
+  const cardInfoClasses = classNames('ts-compression__inner__info--wrapper', {
+    'ts-compression__inner__info--active': Object.keys(cardInfo).length > 0,
+  })
 
   return (
     <div className="ts-compression">
@@ -109,11 +113,10 @@ const Subscription = () => {
       <div className="ts-compression__inner">
         <h2>Compression</h2>
         <p>Interactive visualization</p>
-        <div className="ts-compression__inner__info--wrapper">
+        <div className={cardInfoClasses}>
           <CardInfo {...cardInfo} />
         </div>
         <div className="ts-compression__inner__chunks">
-
            <svg width="100vw"
              id="chunks"
               height="100vh"
@@ -121,7 +124,7 @@ const Subscription = () => {
               fill="none"
               className="ts-compression__inner__chunks__cards-wrapper"
               xmlns="http://www.w3.org/2000/svg" >
-          {data && data.chunks_with_compression.map((chunk) => <Card {...chunk} screenDimensions={chunksRect} handleCardInfo={handleCardInfo} />)}
+              {data && data.chunks_with_compression.map((chunk) => <Card {...chunk} screenDimensions={chunksRect} handleCardInfo={handleCardInfo} />)}
         </svg>
         </div>
         <div className="ts-compression__buttons">

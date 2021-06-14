@@ -21,11 +21,11 @@ const DECOMPRESS_CHUNK = gql`
 
 const ADD_DATA = '';
 
-  const mutationsMap = {
-    compress: COMPRESS_CHUNK,
-    decompress: DECOMPRESS_CHUNK,
-    addData: ADD_DATA,
-  };
+const mutationsMap = {
+  compress: COMPRESS_CHUNK,
+  decompress: DECOMPRESS_CHUNK,
+  addData: ADD_DATA,
+};
 
 function Button({ jobComplete, setLoadModal, isCompressed, chunkName }) {
   const buttonType = isCompressed ? 'decompress' : isCompressed  === undefined ? 'addData' : 'compress';
