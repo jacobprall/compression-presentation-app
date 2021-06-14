@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
-import Button from './button';
 import Count from './count';
 
 const CardInfo = ({
@@ -11,11 +10,6 @@ const CardInfo = ({
   screenPosition,
   range_end,
 }) => {
-  const [isCompressed, setIsCompressed] = useState(
-    after_compression_total_bytes !== null
-  );
-  const [loadModal, setLoadModal] = useState(true);
-
   const getCompressionRatio = (before, after) => {
     if (!after) {
       return 0;
@@ -36,7 +30,7 @@ const CardInfo = ({
       style={{
         top: `${screenPosition?.top || 20}px`,
         left: `calc(${screenPosition?.left || 20}px - 200px)`,
-        border: `${screenPosition ? '1px' : '0'} solid red`,
+        border: `thick solid purple`,
       }}
     >
       <div className="ts-compression__inner__chunks__cards-wrapper__card__info--wrapper">
@@ -64,11 +58,6 @@ const CardInfo = ({
           end={compressionRatio}
           decimals={2}
         />
-        <Button
-          isCompressed={isCompressed}
-          setLoadModal={setLoadModal}
-          chunkName={chunk_name}
-        ></Button>
       </div>
     </div>
   );

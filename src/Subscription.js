@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import classNames from 'classnames';
-import { useMutation, useSubscription, gql } from '@apollo/client';
-import Button from './components/button';
+import { useSubscription, gql } from '@apollo/client';
 import Card from './components/card';
 import CardInfo from './components/cardInfo';
 import { ChoiceGroup } from '@timescale/web-styles';
 import './styles/subscription.scss';
 
 const Subscription = () => {
-  const { loading, error, data } = useSubscription(
+  const { data } = useSubscription(
     gql`
       subscription Chunks {
         chunks_with_compression {
@@ -24,14 +23,21 @@ const Subscription = () => {
   );
 
   const [loadModal, setLoadModal] = useState(false);
-  const [compressAllComplete, setCompressAllComplete] = useState(false);
-  const [allChunks, setAllChunks] = useState([]);
+  const [, setCompressAllComplete] = useState(false);
+  const [, setAllChunks] = useState([]);
   const [cardInfo, setCardInfo] = useState({});
+  const [biggestChunk, setBiggestChunk] = useState({});
+
+  const handleBiggestChunk = (chunk) => {
+    if (Object.keys(biggestChunk).length === 0) return setBiggestChunk(chunk);
+    if(biggestChunk.before_compression_total_bytes < chunk.before_compression_total_bytes) return setBiggestChunk(chunk)
+    return null;
+  }
 
   const handleCardInfo = (info) => setCardInfo(info);
 
   // TO DO - SORTING
-  // const [sortBy, setSortBy] = useState('compressionRatio');
+  const [sortBy, setSortBy] = useState('compressionRatio');
 
   // const sortData = (data = []) => {
   //   if (sortBy === 'compressionRatio') {
@@ -49,22 +55,23 @@ const Subscription = () => {
   //   }
   // };
 
-  // const handleSelect = (val) => {
-  //   setSortBy(val);
-  // };
+  const handleSelect = (val) => {
+    setSortBy(val);
+  };
 
-  // const choiceGroupData = {
-  //   type: 'radio',
-  //   label: 'Sort By:',
-  //   options: [
-  //     { label: 'Compression Ratio', value: 'compressionRatio' },
-  //     {
-  //       label: 'Before Compression Size',
-  //       value: 'before_compression_total_bytes',
-  //     },
-  //   ],
-  // };
-  const svg = typeof window !== 'undefined' && document.getElementById('chunks');
+  const choiceGroupData = {
+    type: 'radio',
+    label: 'Sort By:',
+    options: [
+      { label: 'Compression Ratio', value: 'compressionRatio' },
+      {
+        label: 'Before Compression Size',
+        value: 'before_compression_total_bytes',
+      },
+    ],
+  };
+  const svg =
+    typeof window !== 'undefined' && document.getElementById('chunks');
   const chunksRect = svg?.getBoundingClientRect();
 
   useEffect(() => {
@@ -73,7 +80,9 @@ const Subscription = () => {
       setLoadModal(true);
     } else {
       setLoadModal(false);
-      setAllChunks(data.chunks_with_compression.map((chunk) => chunk.chunk_name))
+      setAllChunks(
+        data.chunks_with_compression.map((chunk) => chunk.chunk_name)
+      );
     }
   }, [data]);
 
@@ -89,11 +98,13 @@ const Subscription = () => {
     } else {
       setCompressAllComplete(false);
     }
+
+    console.log('DATA: ', data);
   }, [data]);
 
   const cardInfoClasses = classNames('ts-compression__inner__info--wrapper', {
     'ts-compression__inner__info--active': Object.keys(cardInfo).length > 0,
-  })
+  });
 
   return (
     <div className="ts-compression">
@@ -113,40 +124,40 @@ const Subscription = () => {
       <div className="ts-compression__inner">
         <h2>Compression</h2>
         <p>Interactive visualization</p>
-        <div className={cardInfoClasses}>
-          <CardInfo {...cardInfo} />
-        </div>
-        <div className="ts-compression__inner__chunks">
-           <svg width="100vw"
-             id="chunks"
-              height="100vh"
-              viewBox="0 0 100vw 100vh"
-              fill="none"
-              className="ts-compression__inner__chunks__cards-wrapper"
-              xmlns="http://www.w3.org/2000/svg" >
-              {data && data.chunks_with_compression.map((chunk) => <Card {...chunk} screenDimensions={chunksRect} handleCardInfo={handleCardInfo} />)}
-        </svg>
-        </div>
         <div className="ts-compression__buttons">
           {/* TO DO - COMPRESS ALL, DECOMPRESS ALL, SORT */}
-          {/* <Button
-            isCompressed={compressAllComplete}
-            setLoadModal={setLoadModal}
-            chunks={allChunks}
-            
-          /> */}
-          {/* <Button 
-            jobComplete={false}
-            setLoadModal={setLoadModal}
-            buttonType='addData'
-            label='ADD DATA'
-          /> */}
-          {/* <ChoiceGroup
+          <ChoiceGroup
             label="Sort By: "
             {...choiceGroupData}
             onChange={(val) => handleSelect(val)}
             value={sortBy}
-          /> */}
+          />
+        </div>
+        <div className={cardInfoClasses}>
+          <CardInfo {...cardInfo} />
+        </div>
+        <div className="ts-compression__inner__chunks">
+          <svg
+            id="chunks"
+            width="auto"
+            height="auto"
+            fill="none"
+            className="ts-compression__inner__chunks__cards-wrapper"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            {data &&
+              data.chunks_with_compression.sort().map((chunk, index) => (
+                <Card
+                  {...chunk}
+                  screenDimensions={chunksRect}
+                  index={index}
+                  handleCardInfo={handleCardInfo}
+                  biggestChunk={biggestChunk}
+                  handleBiggestChunk={handleBiggestChunk}
+                  key={index}
+                />
+              ))}
+          </svg>
         </div>
       </div>
     </div>
