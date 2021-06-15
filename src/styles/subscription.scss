@@ -166,12 +166,14 @@
     }
 
     &__chunks {
-      border: thin solid red;
+      border: thin solid color($navy, 300);
+      box-shadow: 1px solid #0003;
+      border-radius: $gutter-2;
       width: 100%;
       height: 100%;
-      min-height: 1000px;
+      min-height: 500px;
       margin: 0 auto;
-      max-width: 800px;
+      max-width: 1400px;
 
       &__cards-wrapper {
         display: flex;
@@ -181,18 +183,30 @@
 
         &__card {
           max-width: 100px;
-          background: pink;
           margin: 16px;
           position: relative;
           transition: 0.6s all ease-out;
           cursor: pointer;
+          transition: transform 3s ease-out;
+          justify-content: center;
+          background-size: cover;
+          background-repeat: no-repeat;
 
           &--decompressed {
-            fill: cyan;
+            transition: fill 3s ease-out;
+            transition: stroke 3s ease-out;
+            fill: #141e35;
+            animation: decompress-inner 3s ease-out;
+            stroke: #141e35;
           }
 
           &--compressed {
-            fill: orange;
+            transition: fill 3s ease-out;
+            transition: stroke 3s ease-out;
+            fill: #fdb515;
+            stroke: #fdb515;
+            animation: compress-outer 3s ease-out;
+            animation: compress-inner 3s ease-out;
           }
         }
       }
@@ -202,20 +216,43 @@
       position: absolute;
       top: 0;
       right: 0;
-      width: 200px;
+      width: 100%;
+      max-width: 250px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      border: thick solid red;
+      display: block;
       height: 100%;
 
-      &--wrapper {
+
+      &--content {
+        border: thick solid green;
+        padding: 16px 24px;
+        border-radius: 16px;
+
+        h4 {
+          @include body-copy(3, 'bold');
+          margin-bottom: 16px;
+        }
+
+        p {
+          @include body-copy(3);
+          margin-bottom: 16px;
+        }
+      }
+      &__wrapper {
         position: relative;
-        display: block;
-        height: 0;
+        display: flex;
+        height: 100%;
         width: 100%;
         opacity: 0;
-        transition: 0.6s all ease-out;
-      }
+        border: thick solid cyan;
 
-      &--active {
-        opacity: 1;
+        &--active {
+          transition: 0.6s all ease-out;
+          opacity: 1;
+        }
       }
     }
   }
@@ -320,4 +357,8 @@
       left: 0;
     }
   }
+}
+
+#_hyper_2_134_chunk {
+  fill: red;
 }

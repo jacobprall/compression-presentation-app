@@ -30,9 +30,13 @@ const Subscription = () => {
 
   const handleBiggestChunk = (chunk) => {
     if (Object.keys(biggestChunk).length === 0) return setBiggestChunk(chunk);
-    if(biggestChunk.before_compression_total_bytes < chunk.before_compression_total_bytes) return setBiggestChunk(chunk)
+    if (
+      biggestChunk.before_compression_total_bytes <
+      chunk.before_compression_total_bytes
+    )
+      return setBiggestChunk(chunk);
     return null;
-  }
+  };
 
   const handleCardInfo = (info) => setCardInfo(info);
 
@@ -98,12 +102,10 @@ const Subscription = () => {
     } else {
       setCompressAllComplete(false);
     }
-
-    console.log('DATA: ', data);
   }, [data]);
 
-  const cardInfoClasses = classNames('ts-compression__inner__info--wrapper', {
-    'ts-compression__inner__info--active': Object.keys(cardInfo).length > 0,
+  const cardInfoClasses = classNames('ts-compression__inner__info__wrapper', {
+    'ts-compression__inner__info__wrapper--active': Object.keys(cardInfo).length > 0,
   });
 
   return (
@@ -146,17 +148,21 @@ const Subscription = () => {
             xmlns="http://www.w3.org/2000/svg"
           >
             {data &&
-              data.chunks_with_compression.sort().map((chunk, index) => (
-                <Card
-                  {...chunk}
-                  screenDimensions={chunksRect}
-                  index={index}
-                  handleCardInfo={handleCardInfo}
-                  biggestChunk={biggestChunk}
-                  handleBiggestChunk={handleBiggestChunk}
-                  key={index}
-                />
-              ))}
+              data.chunks_with_compression
+                .filter(
+                  (chunk) => !chunk.chunk_name.match(/_hyper_2_[32]_chunk/)
+                )
+                .map((chunk, index) => (
+                  <Card
+                    {...chunk}
+                    screenDimensions={chunksRect}
+                    index={index}
+                    handleCardInfo={handleCardInfo}
+                    biggestChunk={biggestChunk}
+                    handleBiggestChunk={handleBiggestChunk}
+                    key={index}
+                  />
+                ))}
           </svg>
         </div>
       </div>

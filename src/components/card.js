@@ -76,7 +76,7 @@ function Card({
     }
   );
 
-  const screenPosition =
+  const screenPosition = () =>
     typeof window !== 'undefined' &&
     document.getElementById(chunk_name)?.getBoundingClientRect();
 
@@ -96,18 +96,26 @@ function Card({
         screenPosition,
       });
     return handleCardInfo({});
-  }, [after_compression_total_bytes, before_compression_total_bytes, chunk_name, handleCardInfo, hovered, range_end, range_start, screenPosition]);
+  }, [hovered]);
 
   // const now = new Date().getTime();
   // const cx = before_compression_total_bytes / 1024;
   // const cy = (now - new Date(range_start).getTime()) / (60 * 60 * 24 * 365);
-  const cx = (index % 20) * 40 || 100;
+  const cx = (index % 20) * 50 || 100;
   const cy = ~~(index / 20) * 60 + 40 || 100;
   const radioSize =
-    (before_compression_total_bytes /
-      biggestChunk?.before_compression_total_bytes) *
-      16 +
-      4 || 8;
+    Object.keys(biggestChunk).length > 0
+      ? (before_compression_total_bytes /
+          biggestChunk?.before_compression_total_bytes) *
+          16 +
+          4 >
+        30
+        ? 30
+        : (before_compression_total_bytes /
+            biggestChunk?.before_compression_total_bytes) *
+            16 +
+          4
+      : 30;
 
   const mutationVariables = chunk_name
     ? { variables: { chunk: chunk_name } }
@@ -120,9 +128,7 @@ function Card({
 
   useEffect(() => {
     handleBiggestChunk({ chunk_name, before_compression_total_bytes });
-  }, [before_compression_total_bytes, biggestChunk, chunk_name, handleBiggestChunk]);
-
-  console.log('index: ', index);
+  }, []);
 
   return (
     <>

@@ -22,37 +22,34 @@ const CardInfo = ({
     after_compression_total_bytes
   );
 
+  const { top, bottom, left, right } = {...screenPosition};
+
   if (screenPosition) console.log('screenPosition: ', screenPosition);
 
   return (
     <div
       className="ts-compression__inner__info"
       style={{
-        top: `${screenPosition?.top || 20}px`,
-        left: `calc(${screenPosition?.left || 20}px - 200px)`,
-        border: `thick solid purple`,
+        top: `${top || 20}px`,
+        right: `calc(${right || 0}px - 20px)`,
+        left: `calc(${left || 0}px - 20px)`,
+        bottom: `calc(${bottom || 0}px - 20px)`,
       }}
     >
-      <div className="ts-compression__inner__chunks__cards-wrapper__card__info--wrapper">
+      <div className="ts-compression__inner__info--content">
         <h4>{chunk_name}</h4>
-        <div className="ts-compression__inner__chunks__cards-wrapper__card__info">
-          <div>
-            <h4>Before Compression</h4>
-            <Count
-              suffix=" bytes"
-              start={before_compression_total_bytes}
-              end={before_compression_total_bytes || 0}
-            />
-          </div>
-          <div>
-            <h4>After Compression</h4>
-            <Count
-              suffix=" bytes"
-              start={before_compression_total_bytes}
-              end={after_compression_total_bytes || 0}
-            />
-          </div>
-        </div>
+        <h4>Before Compression</h4>
+        <Count
+          suffix=" bytes"
+          start={before_compression_total_bytes}
+          end={before_compression_total_bytes || 0}
+        />
+        <h4>After Compression</h4>
+        <Count
+          suffix=" bytes"
+          start={before_compression_total_bytes}
+          end={after_compression_total_bytes || 0}
+        />
         <Count
           prefix="Compression Ratio: "
           end={compressionRatio}
