@@ -7,7 +7,7 @@ const CardInfo = ({
   before_compression_total_bytes,
   after_compression_total_bytes,
   range_start,
-  screenPosition,
+  cardPosition,
   range_end,
 }) => {
   const getCompressionRatio = (before, after) => {
@@ -22,18 +22,19 @@ const CardInfo = ({
     after_compression_total_bytes
   );
 
-  const { top, bottom, left, right } = {...screenPosition};
+  const { top, bottom, left, right } = cardPosition || {};
 
-  if (screenPosition) console.log('screenPosition: ', screenPosition);
+  if (cardPosition) console.log('cardPosition: ', cardPosition);
 
   return (
     <div
       className="ts-compression__inner__info"
       style={{
-        top: `${top || 20}px`,
-        right: `calc(${right || 0}px - 20px)`,
-        left: `calc(${left || 0}px - 20px)`,
-        bottom: `calc(${bottom || 0}px - 20px)`,
+        position: 'fixed',
+        top: `calc(${top || 20}px - 400px)`,
+        right: `calc(${right || 0}px - 60px)`,
+        left: `calc(${left || 0}px - 60px)`,
+        bottom: `calc(${bottom || 0}px - 400px)`,
       }}
     >
       <div className="ts-compression__inner__info--content">
