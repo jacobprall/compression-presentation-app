@@ -63,6 +63,9 @@ INSERT INTO conditions WITH latest AS ( SELECT time FROM conditions ORDER BY tim
 SELECT generate_series(latest.time + INTERVAL '1 week', latest.time + INTERVAL '1 month', INTERVAL '1 min') AS time,
 (random()*30)::int as device, random()*80 - 40 AS temperature from latest;
 ```
+Basically we're appending data with one week interval to guarantee we don't
+touch any previous chunk but creates new ones. It keeps inserting ~ 40k records
+per month.
 
 ### Testing the compression
 
