@@ -37,6 +37,61 @@ AND             ch.chunk_name = cds.chunk_name;
 With this query, you can get all details about chunk size and what limits they
 cover in the data that is inside the database.
 
+## A minimum hypertable example:
+
+```
+CREATE TABLE conditions (
+      time TIMESTAMPTZ NOT NULL,
+      device INTEGER NOT NULL,
+      temperature FLOAT NOT NULL,
+      PRIMARY KEY(time, device)
+);
+SELECT * FROM create_hypertable('conditions', 'time', 'device', 3);
+
+INSERT INTO conditions
+SELECT time, (random()*30)::int, random()*80 - 40
+FROM generate_series(TIMESTAMP '2020-01-01 00:00:00',
+                 TIMESTAMP '2020-01-01 00:00:00' + INTERVAL '1 month',
+             INTERVAL '1 min') AS time;
+-- INSERT 0 44641
+```
+
+If you want to keep adding more data in the sequence, try the following query:
+
+```sql
+INSERT INTO conditions WITH latest AS ( SELECT time FROM conditions ORDER BY time DESC LIMIT 1 )
+SELECT generate_series(latest.time + INTERVAL '1 week', latest.time + INTERVAL '1 month', INTERVAL '1 min') AS time,
+(random()*30)::int as device, random()*80 - 40 AS temperature from latest;
+```
+
+### Testing the compression
+
+Now it comes the cool part, let's add a compression policy to automatically use
+the `device` column as our main segment.
+
+```sql
+ALTER TABLE conditions SET (
+  timescaledb.compress,
+  timescaledb.compress_segmentby = 'device'
+);
+```
+
+And then we can also set how many days after the record is inserted we want to
+automatically compress:
+
+```sql
+SELECT add_compression_policy('conditions', INTERVAL '7 days');
+```
+
+So, it means that 7 days after the `time` of the insertion, it will compress the
+data.
+
+Checking old chunks that are good candidates to compress
+
+```sql
+SELECT show_chunks('conditions', older_than => INTERVAL '3 days');
+```
+
 
 ## Hasura types
 
