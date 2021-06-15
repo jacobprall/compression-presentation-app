@@ -27,6 +27,7 @@ const Subscription = () => {
   const [, setAllChunks] = useState([]);
   const [cardInfo, setCardInfo] = useState({});
   const [biggestChunk, setBiggestChunk] = useState({});
+  const [chunks, setChunks] = useState([]);
 
   const handleBiggestChunk = (chunk) => {
     if (Object.keys(biggestChunk).length === 0) return setBiggestChunk(chunk);
@@ -88,7 +89,7 @@ const Subscription = () => {
         data.chunks_with_compression.map((chunk) => chunk.chunk_name)
       );
     }
-  }, [data]);
+  }, [chunks]);
 
   useEffect(() => {
     // check if compression is complete
@@ -102,10 +103,17 @@ const Subscription = () => {
     } else {
       setCompressAllComplete(false);
     }
+  }, [chunks]);
+
+  useEffect(() => {
+    if (data && data.chunks_with_compression)
+      return setChunks(data.chunks_with_compression);
   }, [data]);
 
+
   const cardInfoClasses = classNames('ts-compression__inner__info__wrapper', {
-    'ts-compression__inner__info__wrapper--active': Object.keys(cardInfo).length > 0,
+    'ts-compression__inner__info__wrapper--active':
+      Object.keys(cardInfo).length > 0,
   });
 
   return (
@@ -126,15 +134,6 @@ const Subscription = () => {
       <div className="ts-compression__inner">
         <h2>Compression</h2>
         <p>Interactive visualization</p>
-        <div className="ts-compression__buttons">
-          {/* TO DO - COMPRESS ALL, DECOMPRESS ALL, SORT */}
-          <ChoiceGroup
-            label="Sort By: "
-            {...choiceGroupData}
-            onChange={(val) => handleSelect(val)}
-            value={sortBy}
-          />
-        </div>
         <div className={cardInfoClasses}>
           <CardInfo {...cardInfo} />
         </div>
@@ -147,11 +146,9 @@ const Subscription = () => {
             className="ts-compression__inner__chunks__cards-wrapper"
             xmlns="http://www.w3.org/2000/svg"
           >
-            {data &&
-              data.chunks_with_compression
-                .filter(
-                  (chunk) => chunk.hypertable_name === 'conditions'
-                )
+            {chunks.length > 0 &&
+              chunks
+                .filter((chunk) => chunk.hypertable_name === 'conditions')
                 .map((chunk, index) => (
                   <Card
                     {...chunk}
@@ -160,7 +157,10 @@ const Subscription = () => {
                     handleCardInfo={handleCardInfo}
                     biggestChunk={biggestChunk}
                     handleBiggestChunk={handleBiggestChunk}
-                    totalChunks={data.chunks_with_compression.length}
+                    totalChunks={chunks.length}
+                    totalBytesUncompressed={chunks.reduce((totalBytes, currentChunk) => {
+                      return totalBytes + currentChunk.before_compression_total_bytes;
+                    }, 0)}
                     key={index}
                   />
                 ))}

@@ -30,6 +30,7 @@ function Card({
   handleCardInfo,
   handleBiggestChunk,
   totalChunks,
+  totalBytesUncompressed,
 }) {
   const [ref, hovered] = useHover();
 
@@ -42,6 +43,19 @@ function Card({
   const [radioSize, setRadioSize] = useState(24);
 
   const [cardPosition, setCardPosition] = useState({});
+
+  const [spreadFactor, setSpreadFactor] = useState(
+    typeof window !== undefined &&
+      Math.sqrt(
+        (0.9 * window.innerWidth * (0.7 * window.innerHeight)) /
+          totalBytesUncompressed
+      ) / totalChunks
+  );
+
+  const [circlePosition, setCirclePosition] = useState({
+    cx: 700,
+    cy: 300,
+  });
 
   const [mutation] = useMutation(
     isCompressed ? DECOMPRESS_CHUNK : COMPRESS_CHUNK
@@ -81,28 +95,56 @@ function Card({
     }
   );
 
+  const handleCirclePosition = () => {
+    const squaredTotalChunks = Math.sqrt(totalChunks);
+
+    const widthRatio =
+      typeof window !== undefined &&
+      (0.9 * window.innerWidth) / squaredTotalChunks;
+
+    const heightRatio =
+      typeof window !== undefined &&
+      (0.7 * window.innerHeight) / squaredTotalChunks;
+
+    setCirclePosition({
+      cx:
+        (index *
+          spreadFactor *
+          (after_compression_total_bytes ?? before_compression_total_bytes)) %
+          widthRatio || 100,
+      cy:
+        ~~(
+          (index * spreadFactor * after_compression_total_bytes ??
+            before_compression_total_bytes) / heightRatio
+        ) || 100,
+      // cx: 700,
+      // cy: 300,
+    });
+  };
+
+  const handleSpreadFactor = () =>
+    setSpreadFactor(
+      typeof window !== undefined &&
+        Math.sqrt(
+          (0.9 * window.innerWidth * (0.7 * window.innerHeight)) /
+            totalBytesUncompressed
+        ) / totalChunks
+    );
+
   const handleRadioSize = (newSize) => setRadioSize(newSize);
-
-  const screenPosition = () =>
-    document.getElementById(chunk_name)?.getBoundingClientRect();
-
-  // const now = new Date().getTime();
-  // const cx = before_compression_total_bytes / 1024;
-  // const cy = (now - new Date(range_start).getTime()) / (60 * 60 * 24 * 365);
-
-  const Xfactor = Math.sqrt(totalChunks) + 1;
-  const cx = ((index + 1) % Xfactor) * (1400 / Xfactor) || 100;
-  const cy = ~~(((index + 1) / Xfactor) * (600 / Xfactor)) || 100;
-
-  const mutationVariables = chunk_name
-    ? { variables: { chunk: chunk_name } }
-    : { variables: {} };
 
   const handleClick = () => {
     setLoadModal(true);
     console.log(mutationVariables);
     mutation(mutationVariables);
   };
+
+  const screenPosition = () =>
+    document.getElementById(chunk_name)?.getBoundingClientRect();
+
+  const mutationVariables = chunk_name
+    ? { variables: { chunk: chunk_name } }
+    : { variables: {} };
 
   useEffect(() => setCardPosition(screenPosition), []);
 
@@ -131,32 +173,58 @@ function Card({
   useEffect(() => {
     const calcRadioSize = () => {
       if (after_compression_total_bytes)
-        return (
-          (Object.keys(biggestChunk).length > 0 &&
-            (after_compression_total_bytes /
-              biggestChunk?.before_compression_total_bytes) *
-              4 +
-              16) ||
-          30
-        );
-      return (
-        (Object.keys(biggestChunk).length > 0 &&
-          (before_compression_total_bytes /
-            biggestChunk?.before_compression_total_bytes) *
-            4 +
-            16) ||
-        30
-      );
+        return after_compression_total_bytes * spreadFactor;
+      return before_compression_total_bytes * spreadFactor;
     };
-
     handleRadioSize(calcRadioSize || 5);
-  }, [biggestChunk])
+    handleCirclePosition();
+  }, [isCompressed, biggestChunk]);
+
+  useEffect(() => {
+    handleSpreadFactor();
+  }, [totalBytesUncompressed]);
+
+  useEffect(() => {
+    handleCirclePosition();
+    console.log('------------');
+    console.log('Chunk name: ', chunk_name);
+    console.log('Total Chunks: ', totalChunks);
+    console.log('Before Compression: ', totalBytesUncompressed);
+    console.log('Spread Factor', spreadFactor);
+    console.log(
+      `CX - index *
+      spreadFactor *
+      (after_compression_total_bytes ?? before_compression_total_bytes)) %
+      widthRatio `,
+      (((index *
+        spreadFactor *
+        (after_compression_total_bytes ?? before_compression_total_bytes)) %
+        0.9) *
+        window.innerWidth) /
+        Math.sqrt(totalChunks)
+    );
+    console.log(
+      `~~(
+        (index * spreadFactor * after_compression_total_bytes ??
+          before_compression_total_bytes) / heightRatio
+      )`,
+      ~~(
+        ((index * spreadFactor * after_compression_total_bytes ??
+          before_compression_total_bytes) /
+          0.7) *
+        window.innerHeight
+      )
+    );
+    console.log('Inner Width: ', 0.9 * window.innerWidth);
+    console.log('Inner Height', 0.7 * window.innerHeight);
+    console.log('');
+  }, []);
 
   return (
     <>
       <circle
-        cx={cx}
-        cy={cy}
+        cx={circlePosition.cx}
+        cy={circlePosition.cy}
         r={radioSize}
         strokeWidth="2"
         stroke="gray"
