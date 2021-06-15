@@ -27,7 +27,6 @@ function Card({
   index,
   range_start,
   range_end,
-  screenDimensions,
   handleCardInfo,
   handleBiggestChunk,
   totalChunks,
@@ -101,6 +100,7 @@ function Card({
 
   const handleClick = () => {
     setLoadModal(true);
+    console.log(mutationVariables);
     mutation(mutationVariables);
   };
 
