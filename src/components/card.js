@@ -98,28 +98,18 @@ function Card({
   const handleCirclePosition = () => {
     const squaredTotalChunks = Math.sqrt(totalChunks);
 
-    const widthRatio =
-      typeof window !== undefined &&
-      (0.9 * window.innerWidth) / squaredTotalChunks;
+    const circlePosition = document.getElementById('chunks').getBoundingClientRect();
 
-    const heightRatio =
-      typeof window !== undefined &&
-      (0.7 * window.innerHeight) / squaredTotalChunks;
+    const compensationRatio =  circlePosition.width  / circlePosition.height  * 0.8;
+    const widthRatio = circlePosition.width / squaredTotalChunks;
+    const heightRatio = compensationRatio * (circlePosition.height / squaredTotalChunks);
 
-    setCirclePosition({
-      cx:
-        (index *
-          spreadFactor *
-          (after_compression_total_bytes ?? before_compression_total_bytes)) %
-          widthRatio || 100,
-      cy:
-        ~~(
-          (index * spreadFactor * after_compression_total_bytes ??
-            before_compression_total_bytes) / heightRatio
-        ) || 100,
-      // cx: 700,
-      // cy: 300,
-    });
+    const paddingX = 10;
+    const paddingY = 10;
+    const cx = paddingX + (widthRatio * ((index+1) % squaredTotalChunks));
+    const cy = paddingY + (heightRatio * ((index+1) / squaredTotalChunks));
+
+    setCirclePosition({ cx, cy});
   };
 
   const handleSpreadFactor = () =>
