@@ -150,7 +150,7 @@ const Subscription = () => {
             {data &&
               data.chunks_with_compression
                 .filter(
-                  (chunk) => !chunk.chunk_name.match(/_hyper_2_[32]_chunk/)
+                  (chunk) => chunk.hypertable_name === 'conditions'
                 )
                 .map((chunk, index) => (
                   <Card
@@ -160,6 +160,7 @@ const Subscription = () => {
                     handleCardInfo={handleCardInfo}
                     biggestChunk={biggestChunk}
                     handleBiggestChunk={handleBiggestChunk}
+                    totalChunks={data.chunks_with_compression.length}
                     key={index}
                   />
                 ))}

@@ -20,23 +20,27 @@ const DECOMPRESS_CHUNK = gql`
 `;
 
 function Card({
+  after_compression_total_bytes,
+  before_compression_total_bytes,
   biggestChunk,
   chunk_name,
-  before_compression_total_bytes,
-  after_compression_total_bytes,
   index,
   range_start,
   range_end,
   screenDimensions,
   handleCardInfo,
   handleBiggestChunk,
+  totalChunks,
 }) {
   const [ref, hovered] = useHover();
 
   const [isCompressed, setIsCompressed] = useState(
     after_compression_total_bytes !== null
   );
+
   const [, setLoadModal] = useState(true);
+
+  const [radioSize, setRadioSize] = useState(24);
 
   const [cardPosition, setCardPosition] = useState({});
 
@@ -78,9 +82,29 @@ function Card({
     }
   );
 
-  const screenPosition = () => document.getElementById(chunk_name)?.getBoundingClientRect();
+  const handleRadioSize = (newSize) => setRadioSize(newSize);
 
-  useEffect(() => setCardPosition(screenPosition), [])
+  const screenPosition = () =>
+    document.getElementById(chunk_name)?.getBoundingClientRect();
+
+  // const now = new Date().getTime();
+  // const cx = before_compression_total_bytes / 1024;
+  // const cy = (now - new Date(range_start).getTime()) / (60 * 60 * 24 * 365);
+
+  const Xfactor = Math.sqrt(totalChunks) + 1;
+  const cx = ((index + 1) % Xfactor) * (1400 / Xfactor) || 100;
+  const cy = ~~(((index + 1) / Xfactor) * (600 / Xfactor)) || 100;
+
+  const mutationVariables = chunk_name
+    ? { variables: { chunk: chunk_name } }
+    : { variables: {} };
+
+  const handleClick = () => {
+    setLoadModal(true);
+    mutation(mutationVariables);
+  };
+
+  useEffect(() => setCardPosition(screenPosition), []);
 
   useEffect(() => {
     setLoadModal(false);
@@ -100,30 +124,33 @@ function Card({
     return handleCardInfo({});
   }, [hovered]);
 
-  // const now = new Date().getTime();
-  // const cx = before_compression_total_bytes / 1024;
-  // const cy = (now - new Date(range_start).getTime()) / (60 * 60 * 24 * 365);
-  const cx = (index % 20) * 50 || 100;
-  const cy = ~~(index / 20) * 60 + 40 || 100;
-  const radioSize =
-    (Object.keys(biggestChunk).length > 0 &&
-      (before_compression_total_bytes /
-        biggestChunk?.before_compression_total_bytes) *
-        4 +
-        4) ||
-    30;
-  const mutationVariables = chunk_name
-    ? { variables: { chunk: chunk_name } }
-    : { variables: {} };
-
-  const handleClick = () => {
-    setLoadModal(true);
-    mutation(mutationVariables);
-  };
-
   useEffect(() => {
     handleBiggestChunk({ chunk_name, before_compression_total_bytes });
   }, []);
+
+  useEffect(() => {
+    const calcRadioSize = () => {
+      if (after_compression_total_bytes)
+        return (
+          (Object.keys(biggestChunk).length > 0 &&
+            (after_compression_total_bytes /
+              biggestChunk?.before_compression_total_bytes) *
+              4 +
+              16) ||
+          30
+        );
+      return (
+        (Object.keys(biggestChunk).length > 0 &&
+          (before_compression_total_bytes /
+            biggestChunk?.before_compression_total_bytes) *
+            4 +
+            16) ||
+        30
+      );
+    };
+
+    handleRadioSize(calcRadioSize || 5);
+  }, [biggestChunk])
 
   return (
     <>

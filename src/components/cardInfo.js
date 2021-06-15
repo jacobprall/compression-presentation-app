@@ -31,10 +31,10 @@ const CardInfo = ({
       className="ts-compression__inner__info"
       style={{
         position: 'fixed',
-        top: `calc(${top || 20}px - 400px)`,
-        right: `calc(${right || 0}px - 60px)`,
-        left: `calc(${left || 0}px - 60px)`,
-        bottom: `calc(${bottom || 0}px - 400px)`,
+        top: `calc(${top || 20}px - 70px)`,
+        right: `calc(${right || 0}px + 40px)`,
+        left: `calc(${left || 0}px + 40px)`,
+        bottom: `calc(${bottom || 0}px - 70px)`,
       }}
     >
       <div className="ts-compression__inner__info--content">

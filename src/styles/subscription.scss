@@ -213,17 +213,12 @@
     }
 
     &__info {
-      position: absolute;
-      top: 0;
-      right: 0;
+      position: fixed;
+      height: 100%;
       width: 100%;
       max-width: 250px;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
       display: block;
-      height: 100%;
-
+      flex-direction: column;
 
       &--content {
         border: 1px solid color($navy, 300);
@@ -356,8 +351,4 @@
       left: 0;
     }
   }
-}
-
-#_hyper_2_134_chunk {
-  fill: red;
 }
