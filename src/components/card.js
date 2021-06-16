@@ -29,6 +29,7 @@ function Card({
   range_end,
   handleCardInfo,
   handleBiggestChunk,
+  handleCompressingModal,
   screenDimensions,
   totalChunks,
   totalBytesUncompressed,
@@ -39,7 +40,7 @@ function Card({
     after_compression_total_bytes !== null
   );
 
-  const [, setLoadModal] = useState(true);
+  const [loadModal, setLoadModal] = useState(true);
 
   const [radioSize, setRadioSize] = useState(24);
 
@@ -103,7 +104,7 @@ function Card({
 
   const handleClick = () => {
     setLoadModal(true);
-    console.log(mutationVariables);
+    handleCompressingModal(true);
     mutation(mutationVariables);
   };
 

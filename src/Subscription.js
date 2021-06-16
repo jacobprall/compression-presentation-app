@@ -22,6 +22,7 @@ const Subscription = () => {
   );
 
   const [loadModal, setLoadModal] = useState(false);
+  const [compressingModal, setCompressingModal] = useState(false);
   const [, setCompressAllComplete] = useState(false);
   const [, setAllChunks] = useState([]);
   const [cardInfo, setCardInfo] = useState({});
@@ -39,6 +40,8 @@ const Subscription = () => {
   };
 
   const handleCardInfo = (info) => info !== cardInfo && setCardInfo(info);
+
+  const handleCompressingModal = (newState) => setCompressingModal(newState);
 
   const calculateTotalBytesUncompressed = () =>
     chunks &&
@@ -77,8 +80,10 @@ const Subscription = () => {
   }, [chunks]);
 
   useEffect(() => {
-    if (data && data.chunks_with_compression)
-      return setChunks(data.chunks_with_compression);
+    if (data && data.chunks_with_compression) {
+      setChunks(data.chunks_with_compression);
+      handleCompressingModal(false);
+    }
   }, [data]);
 
   const cardInfoClasses = classNames('ts-compression__inner__info__wrapper', {
@@ -274,10 +279,16 @@ const Subscription = () => {
           <CardInfo {...cardInfo} />
         </div>
         <div className="ts-compression__inner__chunks">
+          {compressingModal && (
+            <div className="ts-compression__inner__chunks--compressing">
+              Compressing chunks
+              <div className="dot-flashing"></div>
+            </div>
+          )}
           <svg
             id="chunks"
-            width='90vw'
-            height='80vh'
+            width="90vw"
+            height="75vh"
             fill="none"
             className="ts-compression__inner__chunks__cards-wrapper"
             xmlns="http://www.w3.org/2000/svg"
@@ -298,6 +309,7 @@ const Subscription = () => {
                     handleCardInfo={handleCardInfo}
                     biggestChunk={biggestChunk}
                     handleBiggestChunk={handleBiggestChunk}
+                    handleCompressingModal={handleCompressingModal}
                     totalChunks={chunks.length}
                     totalBytesUncompressed={calculateTotalBytesUncompressed()}
                     key={index}
