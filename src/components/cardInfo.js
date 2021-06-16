@@ -30,8 +30,8 @@ const CardInfo = ({
       style={{
         position: 'fixed',
         top: `calc(${top}px - 20px)`,
-        right: `calc(${right}px + 40px)`,
-        left: `calc(${left}px + 40px)`,
+        right: `calc(${right}px + 80px)`,
+        left: `calc(${left}px + 80px)`,
         bottom: `calc(${bottom}px - 20px)`,
       }}
     >
