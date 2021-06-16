@@ -5,7 +5,7 @@ function Count({
   end,
   prefix,
   suffix,
-  duration = 3,
+  duration = .5,
   decimals = 0,
 }) {
   
