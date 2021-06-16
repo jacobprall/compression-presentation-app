@@ -251,7 +251,8 @@ const Subscription = () => {
             <span>
               {loadModal
                 ? 'Loading chunks...'
-                : `Total chunks: ${chunks && chunks.length}`}
+                  : `Total chunks: ${chunks && chunks.length}.
+                  ${chunks.filter((chunk) => chunk.after_compression_total_bytes).length} compressed.`}
             </span>
           </div>
           <div className="ts-compression__inner__header--logo">
@@ -296,11 +297,6 @@ const Subscription = () => {
             {chunks.length > 0 &&
               chunks
                 .filter((chunk) => chunk.hypertable_name === 'conditions')
-                .sort(
-                  (chunkA, chunkB) =>
-                    chunkB.before_compression_total_bytes -
-                    chunkA.before_compression_total_bytes
-                )
                 .map((chunk, index) => (
                   <Card
                     {...chunk}
