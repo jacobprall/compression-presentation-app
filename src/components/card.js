@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import classNames from 'classnames';
-import useHover from '../hooks/use_hover';
+import useHover from '../hooks/useOnHover';
 import { useMutation, gql } from '@apollo/client';
 
 const COMPRESS_CHUNK = gql`
@@ -29,6 +29,7 @@ function Card({
   range_end,
   handleCardInfo,
   handleBiggestChunk,
+  screenDimensions,
   totalChunks,
   totalBytesUncompressed,
 }) {
@@ -61,26 +62,6 @@ function Card({
     isCompressed ? DECOMPRESS_CHUNK : COMPRESS_CHUNK
   );
 
-  // const getScale = (before, after) => {
-  //   const x = after / before;
-  //   if (!isCompressed || !x) {
-  //     return 1;
-  //   }
-  //   return x;
-  // };
-
-  // const getCompressionRatio = (before, after) => {
-  //   if (!after) {
-  //     return 0;
-  //   }
-  //   return (before / after).toFixed(2);
-  // };
-
-  // const compressionRatio = getCompressionRatio(
-  //   before_compression_total_bytes,
-  //   after_compression_total_bytes
-  // );
-
   const circleClassNames = classNames(
     'ts-compression__inner__chunks__cards-wrapper__card',
     {
@@ -88,9 +69,6 @@ function Card({
         isCompressed,
       'ts-compression__inner__chunks__cards-wrapper__card--decompressed':
         !isCompressed,
-      // 'ts-compression__grid-item__circle': true,
-      // [`ts-compression__grid-item__circle--compressed`]: isCompressed,
-      // [`ts-compression__grid-item__circle--decompressed`]: !isCompressed,
       'ts-compression__inner__chunks__cards-wrapper__card--hovered': hovered,
     }
   );
@@ -129,14 +107,11 @@ function Card({
     mutation(mutationVariables);
   };
 
-  const screenPosition = () =>
-    document.getElementById(chunk_name)?.getBoundingClientRect();
+  const getCardPosition = () => document.getElementById(chunk_name).getBoundingClientRect();
 
   const mutationVariables = chunk_name
     ? { variables: { chunk: chunk_name } }
     : { variables: {} };
-
-  useEffect(() => setCardPosition(screenPosition), []);
 
   useEffect(() => {
     setLoadModal(false);
@@ -168,6 +143,7 @@ function Card({
     };
     handleRadioSize(calcRadioSize || 5);
     handleCirclePosition();
+    setCardPosition(getCardPosition());
   }, [isCompressed, biggestChunk]);
 
   useEffect(() => {
@@ -175,39 +151,8 @@ function Card({
   }, [totalBytesUncompressed]);
 
   useEffect(() => {
+    setCardPosition(getCardPosition());
     handleCirclePosition();
-    console.log('------------');
-    console.log('Chunk name: ', chunk_name);
-    console.log('Total Chunks: ', totalChunks);
-    console.log('Before Compression: ', totalBytesUncompressed);
-    console.log('Spread Factor', spreadFactor);
-    console.log(
-      `CX - index *
-      spreadFactor *
-      (after_compression_total_bytes ?? before_compression_total_bytes)) %
-      widthRatio `,
-      (((index *
-        spreadFactor *
-        (after_compression_total_bytes ?? before_compression_total_bytes)) %
-        0.9) *
-        window.innerWidth) /
-        Math.sqrt(totalChunks)
-    );
-    console.log(
-      `~~(
-        (index * spreadFactor * after_compression_total_bytes ??
-          before_compression_total_bytes) / heightRatio
-      )`,
-      ~~(
-        ((index * spreadFactor * after_compression_total_bytes ??
-          before_compression_total_bytes) /
-          0.7) *
-        window.innerHeight
-      )
-    );
-    console.log('Inner Width: ', 0.9 * window.innerWidth);
-    console.log('Inner Height', 0.7 * window.innerHeight);
-    console.log('');
   }, []);
 
   return (
@@ -217,8 +162,6 @@ function Card({
         cy={circlePosition.cy}
         r={radioSize}
         strokeWidth="2"
-        stroke="gray"
-        fill="white"
         id={chunk_name}
         ref={ref}
         className={circleClassNames}

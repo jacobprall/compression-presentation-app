@@ -9,9 +9,11 @@ const useHover = () => {
     const el = ref.current; // cache external ref value for cleanup use
     if (el) {
       el.addEventListener('mouseenter', enter);
+      el.addEventListener('mouseover', enter);
       el.addEventListener('mouseleave', leave);
       return () => {
         el.removeEventListener('mouseenter', enter);
+        el.removeEventListener('mouseover', enter);
         el.removeEventListener('mouseleave', leave);
       };
     }

@@ -6,9 +6,7 @@ const CardInfo = ({
   chunk_name,
   before_compression_total_bytes,
   after_compression_total_bytes,
-  range_start,
   cardPosition,
-  range_end,
 }) => {
   const getCompressionRatio = (before, after) => {
     if (!after) {
@@ -31,10 +29,10 @@ const CardInfo = ({
       className="ts-compression__inner__info"
       style={{
         position: 'fixed',
-        top: `calc(${top || 20}px - 70px)`,
-        right: `calc(${right || 0}px + 40px)`,
-        left: `calc(${left || 0}px + 40px)`,
-        bottom: `calc(${bottom || 0}px - 70px)`,
+        top: `calc(${top}px - 20px)`,
+        right: `calc(${right}px + 40px)`,
+        left: `calc(${left}px + 40px)`,
+        bottom: `calc(${bottom}px - 20px)`,
       }}
     >
       <div className="ts-compression__inner__info--content">
