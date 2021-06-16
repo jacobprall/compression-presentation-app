@@ -60,7 +60,7 @@ If you want to keep adding more data in the sequence, try the following query:
 
 ```sql
 INSERT INTO conditions WITH latest AS ( SELECT time FROM conditions ORDER BY time DESC LIMIT 1 )
-SELECT generate_series(latest.time + INTERVAL '1 week', latest.time + INTERVAL '1 month', INTERVAL '1 min') AS time,
+SELECT generate_series(latest.time + INTERVAL '1 week', latest.time + INTERVAL '6 month', INTERVAL '1 min') AS time,
 (random()*30)::int as device, random()*80 - 40 AS temperature from latest;
 ```
 Basically we're appending data with one week interval to guarantee we don't
@@ -140,6 +140,8 @@ easily track each function as a query or mutation.
 In our case, our view will be the query and we're going to use as a
 subscription. The `decompress_chunk_named` and `compress_chunk_named` will be
 tracked as GQL mutations.
+
+
 
 ## Setup application
 
