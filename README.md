@@ -39,7 +39,7 @@ cover in the data that is inside the database.
 
 ## A minimum hypertable example:
 
-```
+```sql
 CREATE TABLE conditions (
       time TIMESTAMPTZ NOT NULL,
       device INTEGER NOT NULL,
@@ -63,7 +63,8 @@ INSERT INTO conditions WITH latest AS ( SELECT time FROM conditions ORDER BY tim
 SELECT generate_series(latest.time + INTERVAL '1 week', latest.time + INTERVAL '6 month', INTERVAL '1 min') AS time,
 (random()*30)::int as device, random()*80 - 40 AS temperature from latest;
 ```
-Basically we're appending data with one week interval to guarantee we don't
+
+The insert will append new data with one week interval to guarantee we don't
 touch any previous chunk but creates new ones. It keeps inserting ~ 40k records
 per month.
 
@@ -95,6 +96,10 @@ Checking old chunks that are good candidates to compress
 SELECT show_chunks('conditions', older_than => INTERVAL '3 days');
 ```
 
+# Hasura Mutations
+
+We want to have mutations for compress and decompress chunk. To accomplish that,
+we need to take a look on how hasura types works.
 
 ## Hasura types
 
@@ -103,6 +108,7 @@ Hasura needs to receive data from custom types that comes from table structures.
 I couldn't find a simple way to wrap this without using a table, so, I'll easily
 get the structure of the table calling the function with limit 0:
 
+## Compress chunk mutation
 ```sql
 CREATE TABLE compressed_chunk AS
 SELECT compress_chunk((c.chunk_schema ||'.' ||c.chunk_name)::regclass)
@@ -110,7 +116,9 @@ FROM   timescaledb_information.chunks c
 WHERE  NOT c.is_compressed limit 0;
 ```
 
-Now, we can return the "compressed_chunk" in our function:
+
+Now, we can return the "compressed_chunk" in our function that will compress
+the chunk:
 
 ```sql
 CREATE OR REPLACE FUNCTION compress_chunk_named(varchar) returns setof compressed_chunk AS $$
@@ -121,7 +129,10 @@ CREATE OR REPLACE FUNCTION compress_chunk_named(varchar) returns setof compresse
 $$ LANGUAGE SQL VOLATILE;
 ```
 
-Same for decompression:
+## Decompress chunk mutation
+
+
+We'll need a similar function for the decompression:
 
 ```sql
 CREATE OR replace FUNCTION decompress_chunk_named(varchar) returns setof compressed_chunk AS $$
@@ -132,7 +143,8 @@ CREATE OR replace FUNCTION decompress_chunk_named(varchar) returns setof compres
 $$ LANGUAGE SQL VOLATILE;
 ```
 
-Now, the next step is jump into hasura API and connect into your database.
+Now, the next step is jump into hasura cloud and connect the database as a new
+data source.
 
 In the data panel, after setting up the postgresql URI of you database, you can
 easily track each function as a query or mutation.
@@ -141,19 +153,17 @@ In our case, our view will be the query and we're going to use as a
 subscription. The `decompress_chunk_named` and `compress_chunk_named` will be
 tracked as GQL mutations.
 
-
-
 ## Setup application
 
 Create a `.env` file with your hasura key:
 
-```
+```bash
 REACT_APP_X_HASURA_ADMIN_SECRET=...
 ```
 
 Install all dependencies before run the project:
 
-```
+```bash
 yarn install
 ```
 
