@@ -1,12 +1,15 @@
 # Chunk visualizer
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app)
-and it basically connects to a hasura graphql api to visualize hypertable chunks of a [TimescaleDB](https://timescale.com)
-instance.
+and it basically connects to a [hasura](http://hasura.io) graphql api to visualize hypertable chunks of a [TimescaleDB](https://timescale.com) instance.
 
 
-Hypertables are an abstract table representation that empowers timeseries
-storage for postgresql databases.
+Hypertables are an abstract table representation that empowers timeseries storage for postgresql databases. The yellow circles represents the compressed data and the dark represents the uncompressed.
+
+<img width="1250" alt="Screen Shot 2021-06-16 at 15 14 44" src="https://user-images.githubusercontent.com/15484/122271279-a0604c00-ceb5-11eb-8a3f-857645ec783d.png">
+
+
+The idea here is collect this metadata from the "chunks" that are like subtables of the hypertables.
 
 This is a simple way to preview chunks and here is how to make it happen:
 
@@ -90,10 +93,17 @@ SELECT add_compression_policy('conditions', INTERVAL '7 days');
 So, it means that 7 days after the `time` of the insertion, it will compress the
 data.
 
-Checking old chunks that are good candidates to compress
+Checking old chunks that are good candidates to compress:
 
 ```sql
 SELECT show_chunks('conditions', older_than => INTERVAL '3 days');
+```
+
+You can decompress manually a chunk with the following command:
+
+```sql
+SELECT decompress_chunk_named(chunk_name::varchar) 
+FROM timescaledb_information.chunks WHERE is_compressed limit 1;
 ```
 
 # Hasura Mutations
@@ -103,12 +113,14 @@ we need to take a look on how hasura types works.
 
 ## Hasura types
 
-Hasura needs to receive data from custom types that comes from table structures.
+Hasura can use some custom types that comes from table structures.
 
 I couldn't find a simple way to wrap this without using a table, so, I'll easily
 get the structure of the table calling the function with limit 0:
 
 ## Compress chunk mutation
+
+
 ```sql
 CREATE TABLE compressed_chunk AS
 SELECT compress_chunk((c.chunk_schema ||'.' ||c.chunk_name)::regclass)
@@ -116,9 +128,9 @@ FROM   timescaledb_information.chunks c
 WHERE  NOT c.is_compressed limit 0;
 ```
 
+Hasura needs some function to be tracked as mutation. In this case, let's create the function to just rewrap the default `compress_chunk` from timescale extension. 
 
-Now, we can return the "compressed_chunk" in our function that will compress
-the chunk:
+Now, we can return the "compressed_chunk" in our function that will compress the chunk:
 
 ```sql
 CREATE OR REPLACE FUNCTION compress_chunk_named(varchar) returns setof compressed_chunk AS $$
@@ -129,8 +141,9 @@ CREATE OR REPLACE FUNCTION compress_chunk_named(varchar) returns setof compresse
 $$ LANGUAGE SQL VOLATILE;
 ```
 
-## Decompress chunk mutation
+> Note that the function add an extra where clause to not compress what is already compressed.
 
+## Decompress chunk mutation
 
 We'll need a similar function for the decompression:
 
@@ -146,12 +159,19 @@ $$ LANGUAGE SQL VOLATILE;
 Now, the next step is jump into hasura cloud and connect the database as a new
 data source.
 
-In the data panel, after setting up the postgresql URI of you database, you can
-easily track each function as a query or mutation.
 
-In our case, our view will be the query and we're going to use as a
-subscription. The `decompress_chunk_named` and `compress_chunk_named` will be
-tracked as GQL mutations.
+In the data panel, after setting up the postgresql URI of you database, you can
+easily track each function as a query or mutation. Here is an example of `compress_chunk_named` function:
+
+<img width="617" alt="Screen Shot 2021-06-16 at 15 23 48" src="https://user-images.githubusercontent.com/15484/122272819-27fa8a80-ceb7-11eb-93de-ddf678acbc2a.png">
+
+
+In our case, the subscription goes to the `chunks_with_compression` and here is what it looks like:
+
+<img width="701" alt="Screen Shot 2021-06-16 at 15 25 20" src="https://user-images.githubusercontent.com/15484/122273065-6bed8f80-ceb7-11eb-8233-58d9fcccb2d1.png">
+
+
+You should also track `decompress_chunk_named` and `compress_chunk_named` as GQL mutations with a single argument.
 
 ## Setup application
 
