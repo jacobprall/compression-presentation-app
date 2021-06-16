@@ -276,8 +276,8 @@ const Subscription = () => {
         <div className="ts-compression__inner__chunks">
           <svg
             id="chunks"
-            width={((typeof window !== 'undefined') && `${0.9 * window.innerWidth}`) || 'auto'}
-            height={`${(chunks && 40 * Math.sqrt(chunks.length)) || 200}`}
+            width='90vw'
+            height='80vh'
             fill="none"
             className="ts-compression__inner__chunks__cards-wrapper"
             xmlns="http://www.w3.org/2000/svg"
