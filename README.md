@@ -1,8 +1,7 @@
 # Chunk visualizer
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app)
-and it basically connects to a [hasura](http://hasura.io) graphql api to visualize [hypertable chunks](https://tsdb.co/hasuracon-hypertables-docs) of a [TimescaleDB](https://timescale.com) instance.
-
+and it basically connects to a [hasura](http://hasura.io) graphql api to visualize [hypertable chunks](https://tsdb.co/hasuracon-hypertables-docs) of a [TimescaleDB](https://timescale.com) instance. If you don't have an instance, you can get a free one [here](https://tsdb.co/hasuracon-signup).
 
 [Hypertables](https://tsdb.co/hasuracon-hypertables-docs) are an abstract table representation that empowers timeseries storage for postgresql databases. The yellow circles represents the compressed data and the dark represents the uncompressed.
 
