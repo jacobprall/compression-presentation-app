@@ -10,10 +10,10 @@ and it basically connects to a [hasura](http://hasura.io) graphql api to visuali
 
 The idea here is collect this metadata from the "chunks" that are like subtables of the hypertables.
 
-This is a simple way to preview chunks and here is how to make it happen:
+Here is a simple view with the chunks information aggregating data from different sources:
 
 ```sql
-CREATE OR replace VIEW chunks_with_compression AS
+CREATE OR REPLACE VIEW chunks_with_compression AS
 SELECT DISTINCT ch.chunk_name,
                 ccs.chunk_schema,
                 ch.hypertable_schema,
@@ -41,6 +41,13 @@ cover in the data that is inside the database.
 
 ## A minimum hypertable example:
 
+
+If you don't have a database do test, here is a minimal example to have some
+data and test how it goes.
+
+In this example, we're creating a table `conditions` that belongs to some
+`device` and output some `temperature` to a given `time`.
+
 ```sql
 CREATE TABLE conditions (
       time TIMESTAMPTZ NOT NULL,
@@ -55,10 +62,13 @@ SELECT time, (random()*30)::int, random()*80 - 40
 FROM generate_series(TIMESTAMP '2020-01-01 00:00:00',
                  TIMESTAMP '2020-01-01 00:00:00' + INTERVAL '1 month',
              INTERVAL '1 min') AS time;
--- INSERT 0 44641
 ```
 
-If you want to keep adding more data in the sequence, try the following query:
+By default, we're inserting a month for testing purposes, but you can get deep
+adding more data in the sequence.
+
+You can try the following query to append 6 months of data right one week after the
+previous data was added.
 
 ```sql
 INSERT INTO conditions WITH latest AS ( SELECT time FROM conditions ORDER BY time DESC LIMIT 1 )
@@ -67,8 +77,9 @@ SELECT generate_series(latest.time + INTERVAL '1 week', latest.time + INTERVAL '
 ```
 
 The insert will append new data with one week interval to guarantee we don't
-touch any previous chunk but creates new ones. It keeps inserting ~ 40k records
+touch any previous chunk but creates new ones. It keeps inserting around 40k records
 per month.
+
 
 ### Testing the compression
 
@@ -105,10 +116,12 @@ SELECT decompress_chunk_named(chunk_name::varchar)
 FROM timescaledb_information.chunks WHERE is_compressed limit 1;
 ```
 
-# Hasura Mutations
+# GraphQL Mutations
 
-We want to have mutations for compress and decompress chunk. To accomplish that,
-we need to take a look on how hasura types works.
+On GraphQL, the convention for operations that is writing data is use mutations.
+
+We need to map those mutations for compress and decompress a chunk. To
+accomplish that, we need to take a look on how hasura types works.
 
 ## Hasura types
 
@@ -177,7 +190,8 @@ You should also track `decompress_chunk_named` and `compress_chunk_named` as GQL
 Create a `.env` file with your hasura key:
 
 ```bash
-REACT_APP_X_HASURA_ADMIN_SECRET=...
+HASURA_ADMIN_SECRET=...
+HASURA_URI=wss://<your-project>.hasura.app/v1/graphql
 ```
 
 Install all dependencies before run the project:
@@ -185,6 +199,116 @@ Install all dependencies before run the project:
 ```bash
 yarn install
 ```
+
+## Exploring the React Components
+
+This app was built with `create-react-app` and this is the most easy way to
+setup the app.
+
+The third party libraries added was only:
+
+1. [Apollo][apollo-react] to get a websocket client.
+2. [Timescale Styles][timescale-styles] to get some default styles from Timescale branding.
+
+### Setting up ApolloClient connection
+
+The first step is get the Apollo client up and connecting to the Hasura cloud.
+
+> Note that you should have the `.env` file properly configured to make it work.
+
+```javascript
+const createApolloClient = () => {
+  return new ApolloClient({
+    link: new WebSocketLink({
+      uri: process.env.HASURA_URI,
+      options: {
+        reconnect: true,
+        connectionParams: {
+          headers: {
+            'x-hasura-admin-secret':
+              process.env.HASURA_ADMIN_SECRET,
+          },
+        },
+      },
+    }),
+    cache: new InMemoryCache(),
+  });
+};
+```
+
+In the main `App` we have:
+
+```javascript
+function App() {
+  const client = createApolloClient();
+
+  return (
+    <ApolloProvider client={client} className="App">
+      <Subscription />
+    </ApolloProvider>
+  );
+}
+
+export default App;
+```
+
+Note that we have a `Subscription` component, that is where we subscribe to our 
+`chunks_with_compression` view that we mapped as a resource on Hasura Cloud.
+
+
+```javascript
+const Subscription = () => {
+  const { data } = useSubscription(
+    gql`
+      subscription Chunks {
+        chunks_with_compression {
+          hypertable_name
+          chunk_name
+          range_start
+          range_end
+          before_compression_total_bytes
+          after_compression_total_bytes
+        }
+      }
+    `
+  );
+}
+```
+
+We need to have some state to control when we receive the chunks. React uses
+states to pass information between components and if any data changes, it will
+automatically refresh the components through `useEffect` hook.
+
+```javascript
+  const [chunks, setChunks] = useState([]);
+
+  useEffect(() => {
+    if (data && data.chunks_with_compression) {
+      setChunks(data.chunks_with_compression);
+    }
+  }, [data]);
+
+  return (<svg id="chunks" width="90vw" height="75vh" fill="none"
+            className="ts-compression__inner__chunks__cards-wrapper"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            {chunks.length > 0 &&
+              chunks
+                .filter((chunk) => chunk.hypertable_name === 'conditions')
+                .map((chunk, index) => (
+                  <Chunk {...chunk} key={index} />
+                ))}
+          </svg>);
+};
+
+export default Subscription;
+```
+
+This is the minimal example and we evolved to exchange several states and
+enhance with more functionalities.
+
+In the `Card`, it's possible to build the logic of the component and think about
+the compression visualization and how to explore it.
 
 ## Available Scripts
 
@@ -219,3 +343,4 @@ You can learn more in the [Create React App documentation](https://facebook.gith
 
 To learn React, check out the [React documentation](https://reactjs.org/).
 
+[apollo-react]: https://www.apollographql.com/docs/react/
