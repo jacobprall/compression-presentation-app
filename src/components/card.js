@@ -46,13 +46,13 @@ function Card({
 
   const [cardPosition, setCardPosition] = useState({});
 
-  const [spreadFactor, setSpreadFactor] = useState(
-    typeof window !== undefined &&
-      Math.sqrt(
-        (0.9 * window.innerWidth * (0.7 * window.innerHeight)) /
-          totalBytesUncompressed
-      ) / totalChunks
-  );
+  const [spreadFactor, setSpreadFactor] = useState(() => {
+    if (typeof window !== undefined){
+      const pixelsPerByte = (window.innerWidth * window.innerHeight) / totalBytesUncompressed;
+      return Math.sqrt(pixelsPerByte) / totalChunks;
+    }
+  }
+);
 
   const [circlePosition, setCirclePosition] = useState({
     cx: 700,
@@ -79,14 +79,12 @@ function Card({
 
     const circlePosition = document.getElementById('chunks').getBoundingClientRect();
 
-    const compensationRatio =  circlePosition.width  / circlePosition.height  * 0.8;
+    const compensationRatio =  circlePosition.width  / circlePosition.height;
     const widthRatio = circlePosition.width / squaredTotalChunks;
     const heightRatio = compensationRatio * (circlePosition.height / squaredTotalChunks);
 
-    const paddingX = 10;
-    const paddingY = 10;
-    const cx = paddingX + (widthRatio * ((index+1) % squaredTotalChunks));
-    const cy = paddingY + (heightRatio * ((index+1) / squaredTotalChunks));
+    const cx = (widthRatio * ((index+1) % squaredTotalChunks));
+    const cy = (heightRatio * ((index+1) / squaredTotalChunks));
 
     setCirclePosition({ cx, cy});
   };
@@ -99,8 +97,6 @@ function Card({
             totalBytesUncompressed
         ) / totalChunks
     );
-
-  const handleRadioSize = (newSize) => setRadioSize(newSize);
 
   const handleClick = () => {
     setLoadModal(true);
@@ -137,12 +133,11 @@ function Card({
   }, []);
 
   useEffect(() => {
-    const calcRadioSize = () => {
+    setRadioSize(() => {
       if (after_compression_total_bytes)
         return after_compression_total_bytes * spreadFactor;
       return before_compression_total_bytes * spreadFactor;
-    };
-    handleRadioSize(calcRadioSize || 5);
+    });
     handleCirclePosition();
     setCardPosition(getCardPosition());
   }, [isCompressed, biggestChunk]);
@@ -152,7 +147,6 @@ function Card({
   }, [totalBytesUncompressed]);
 
   useEffect(() => {
-    setCardPosition(getCardPosition());
     handleCirclePosition();
   }, []);
 
