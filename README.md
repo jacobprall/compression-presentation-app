@@ -307,8 +307,144 @@ export default Subscription;
 This is the minimal example and we evolved to exchange several states and
 enhance with more functionalities.
 
-In the `Card`, it's possible to build the logic of the component and think about
+In the `Chunk`, it's possible to build the logic of the component and think about
 the compression visualization and how to explore it.
+
+Here is a small example of what the final component returns:
+
+```javascript
+  return (
+    <>
+      <circle
+        r={radioSize}
+        cx={circlePosition.cx}
+        cy={circlePosition.cy}
+        strokeWidth="2"
+        id={chunk_name}
+        ref={ref}
+        onClick={handleClick}
+      />
+    </>
+  );
+```
+
+We have two main aspects of the chunk visualization, the position and the size.
+
+Let's start with the size, that is defined by the `radioSize`. It will be a
+state that will depend on the sum of all uncompressed data. By default we start
+with 24 pixels.
+
+The first think we need to get is some proportions of the screen. We created a
+`spreadFactor` that can be defined as the square root of the size of the screen
+divided by the total bytes uncompressed. We split this value by the number of
+chunks to know the distance between them.
+
+```javascript
+  const [spreadFactor, setSpreadFactor] = useState(() => {
+    if (typeof window !== undefined){
+      const pixelsPerByte = (window.innerWidth * window.innerHeight) / totalBytesUncompressed;
+      return Math.sqrt(pixelsPerByte) / totalChunks;
+    }
+  }
+```
+
+With spreadFactor in place, we can now think about how to size every circle. The
+first thing is create a new state to set the radioSize.
+
+```javascript
+const [radioSize, setRadioSize] = useState(24);
+```
+
+The next step is create a new hook to resize it based in the total bytes.
+When the `after_compression_total_bytes` is available, it will use this
+as the size factor otherwise it gets from the compressed size.
+
+
+```javascript
+useEffect(() => {
+  const calcRadioSize =
+    setRadioSize(() => {
+      if (after_compression_total_bytes)
+        return after_compression_total_bytes * spreadFactor;
+      return before_compression_total_bytes * spreadFactor;
+    });
+}, [isCompressed, biggestChunk]);
+```
+
+The objective is that the entire area represents the full area of the
+uncompressed data. So, here is how we break down the formula for choosing the
+proper position for X and Y and spread the circles in the screen.
+
+We start our thought with getting the sense of a squared space. With squared
+elements. So, given the total amount of chunks, we can square root it to get the
+size of or circles matrix:
+
+```javascript
+const squaredTotalChunks = Math.sqrt(totalChunks);
+```
+
+The `svg` element has an `id` named `chunks` and we can use such info to get the
+properties of the element in the screen and better distribute the circles.
+We'll use independent factors for width and height.
+
+Let's start with the simple one that is width:
+
+```javascript
+const circlePosition = document.getElementById('chunks').getBoundingClientRect();
+const widthRatio = circlePosition.width / squaredTotalChunks;
+```
+As the height is smaller than the width, we need to compensate it to keep the
+"square" proportion.
+
+```javascript
+const compensationRatio =  circlePosition.width / circlePosition.height;
+const heightRatio = compensationRatio * (circlePosition.height / squaredTotalChunks);
+```
+
+The index refers to what chunk is iterating over loop, so, it will be used as a
+step to get into a fair distribution of the space.
+
+```javascript
+const cx = (widthRatio * ((index+1) % squaredTotalChunks));
+const cy = (heightRatio * ((index+1) / squaredTotalChunks));
+
+setCirclePosition({ cx, cy});
+```
+
+Now, that you got an understanding of all steps to build the calculate the size,
+let's wrap it into a function that can be used in the `useEffect` hook.
+
+```javascript
+const handleCirclePosition = () => {
+  const squaredTotalChunks = Math.sqrt(totalChunks);
+
+  const circlePosition = document.getElementById('chunks').getBoundingClientRect();
+
+  const compensationRatio =  circlePosition.width  / circlePosition.height;
+  const widthRatio = circlePosition.width / squaredTotalChunks;
+  const heightRatio = compensationRatio * (circlePosition.height / squaredTotalChunks);
+
+  const cx = (widthRatio * ((index+1) % squaredTotalChunks));
+  const cy = (heightRatio * ((index+1) / squaredTotalChunks));
+
+  setCirclePosition({ cx, cy});
+};
+```
+
+Now, it's time to use the sizing function in the `useEffect` hook when it
+starts.
+
+```javascript
+useEffect(handleCirclePosition, []);
+```
+
+When it finds a new biggest chunk or the chunk changes the state, we should also
+recalculate it:
+
+```javascript
+useEffect(handleCirclePosition, [isCompressed, biggestChunk]);
+```
+
 
 ## Available Scripts
 
