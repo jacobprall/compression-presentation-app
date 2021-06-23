@@ -19,7 +19,7 @@ const DECOMPRESS_CHUNK = gql`
   }
 `;
 
-function Card({
+function Chunk({
   after_compression_total_bytes,
   before_compression_total_bytes,
   biggestChunk,
@@ -166,4 +166,4 @@ function Card({
   );
 }
 
-export default Card;
+export default Chunk;

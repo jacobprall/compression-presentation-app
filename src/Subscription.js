@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { useSubscription, gql } from '@apollo/client';
-import Card from './components/card';
+import Chunk from './components/chunk';
 import CardInfo from './components/cardInfo';
 import './styles/subscription.scss';
 
@@ -297,7 +297,7 @@ const Subscription = () => {
               chunks
                 .filter((chunk) => chunk.hypertable_name === 'conditions')
                 .map((chunk, index) => (
-                  <Card
+                  <Chunk
                     {...chunk}
                     screenDimensions={chunksRect}
                     index={index}
