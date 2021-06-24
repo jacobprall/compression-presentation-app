@@ -22,8 +22,6 @@ const CardInfo = ({
 
   const { top, bottom, left, right } = cardPosition || {};
 
-  if (cardPosition) console.log('cardPosition: ', cardPosition);
-
   return (
     <div
       className="ts-compression__inner__info"
