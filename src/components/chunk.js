@@ -101,14 +101,10 @@ function Chunk({
   const handleClick = () => {
     setLoadModal(true);
     handleCompressingModal(true);
-    mutation(mutationVariables);
+    mutation({ variables: { chunk: chunk_name } });
   };
 
   const getCardPosition = () => document.getElementById(chunk_name).getBoundingClientRect();
-
-  const mutationVariables = chunk_name
-    ? { variables: { chunk: chunk_name } }
-    : { variables: {} };
 
   useEffect(() => {
     setLoadModal(false);
