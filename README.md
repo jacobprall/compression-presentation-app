@@ -445,6 +445,188 @@ recalculate it:
 useEffect(handleCirclePosition, [isCompressed, biggestChunk]);
 ```
 
+### Chunk events
+
+The next step is to map the events to interact with the chunk. When clicking in the chunk, we want to compress or decompress.
+If we mouse over the circle, it should plot some card with the info.
+
+#### Click in the chunk to compress/decompress
+
+Now it’s time to interact with the chunk and check more details of the handleClick function. If the chunk is compressed we can decompress or make the inverse operation case it’s decompressed.
+
+Let’s start by declaring the mutation to compress the chunk:
+
+```javascript
+const COMPRESS_CHUNK = gql`
+  mutation ($chunk: String!) {
+    compress_chunk_named(args: { arg_1: $chunk }) {
+      compress_chunk
+    }
+  }
+`;
+```
+As you can see, the mutation receives an argument that is the `chunk_name` from the context. Now we can create a similar structure to also decompress the chunk:
+
+```javascript
+const DECOMPRESS_CHUNK = gql`
+  mutation ($chunk: String!) {
+    decompress_chunk_named(args: { arg_1: $chunk }) {
+      compress_chunk
+    }
+  }
+`;
+```
+
+Depending the state of the chunk, we’re going to choose the operation to compress or decompress, so, our mutation will be initialized with the proper GraphQL statement:
+
+
+```javascript
+const [mutation] = useMutation( isCompressed ? DECOMPRESS_CHUNK : COMPRESS_CHUNK);
+```
+
+Then, when we handle the click, we just execute the mutation binding the actual chunk name in the context. In this case we’re suppressing the front end details that shows a modal when it’s compressing.
+
+```javascript
+const handleClick = () => { mutation( { variables: { chunk: chunk_name } }); };
+```
+
+#### Mouse over the chunk to see details
+
+Apart from having the chunk available on the screen and clicking through the circles, we also want to get more information about the sizing if we mouse hover it. So, let’s create a React hook to change the hover state:
+
+```javascript
+import useHover from '../hooks/useOnHover';
+```
+
+Creating the hook to control the hovering state of each independent chunk.
+
+```javascript
+import { useState, useEffect, useRef } from 'react';
+const useHover = () => {
+  const ref = useRef();
+  const [hovered, setHovered] = useState(false);
+  const enter = () => setHovered(true);
+  const leave = () => setHovered(false);
+  useEffect(() => {
+    const el = ref.current; // cache external ref value for cleanup use
+    if (el) {
+      el.addEventListener('mouseenter', enter);
+      el.addEventListener('mouseover', enter);
+      el.addEventListener('mouseleave', leave);
+      return () => {
+        el.removeEventListener('mouseenter', enter);
+        el.removeEventListener('mouseover', enter);
+        el.removeEventListener('mouseleave', leave);
+      };
+    }
+  }, []);
+  return [ref, hovered];
+};
+export default useHover;
+```
+
+And now we can just use it as a state for the actual Chunk component:
+
+
+```javascript
+const [ref, hovered] = useHover();
+```
+
+
+Now, the hovered variable changes the we can push a new state to handleCardInfo and useEffect to show the actual chunk information in the informative card:
+
+
+```javascript
+  useEffect(() => {
+    if (hovered)
+      return handleCardInfo({
+        chunk_name,
+        before_compression_total_bytes,
+        after_compression_total_bytes,
+        range_start,
+        range_end,
+        cardPosition,
+      });
+    return handleCardInfo({});
+  }, [hovered]);
+```
+
+Keep in mind that the InformationCard is a simple component that receives the data via state and expose the values closer to the hovered element.
+
+```javascript
+const CardInfo = ({
+  chunk_name,
+  before_compression_total_bytes,
+  after_compression_total_bytes,
+  cardPosition,
+}) => {
+  const getCompressionRatio = (before, after) => {
+    if (!after) {
+      return 0;
+    }
+    return (before / after).toFixed(2);
+  };
+
+  const compressionRatio = getCompressionRatio(
+    before_compression_total_bytes,
+    after_compression_total_bytes
+  );
+
+  const { top, bottom, left, right } = cardPosition || {};
+
+  return (
+    <div
+      className="ts-compression__inner__info"
+      style={{
+        position: 'fixed',
+        top: `calc(${top}px - 20px)`,
+        right: `calc(${right}px + 80px)`,
+        left: `calc(${left}px + 80px)`,
+        bottom: `calc(${bottom}px - 20px)`,
+      }}
+    >
+      <div className="ts-compression__inner__info--content">
+        <h4>{chunk_name}</h4>
+        <h4>Before Compression</h4>
+        <Count
+          suffix=" bytes"
+          start={before_compression_total_bytes}
+          end={before_compression_total_bytes}
+        />
+        <h4>After Compression</h4>
+        <Count
+          suffix=" bytes"
+          start={before_compression_total_bytes}
+          end={after_compression_total_bytes || 0}
+        />
+        <Count
+          prefix="Compression Ratio: "
+          end={compressionRatio}
+          decimals={2}
+        />
+      </div>
+    </div>
+  );
+};
+
+export default CardInfo;
+```
+
+Now, we can change the subscription to also include the CardInfo visible when the user is hovering a chunk:
+
+```javascript
+<div className={cardInfoClasses}>
+   <CardInfo {...cardInfo} />
+</div>
+```
+
+And the cardInfoClasses can be toggling the CSS class names that controls if the card is showing up or not. If the cardInfo is an empty object it means nobody is hovering over it.
+
+```javascript
+const cardInfoClasses = classNames({
+  'active':  Object.keys(cardInfo).length > 0,
+});
+```
 
 ## Available Scripts
 
